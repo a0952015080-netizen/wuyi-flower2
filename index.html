@@ -892,21 +892,28 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
     </div>
   </div>
 
-  <!-- 4. 加購商品（僅留花束專屬提袋，精緻與條紋款已內含） -->
-  <div class="card">
+  <!-- 4. 加購商品（精緻與條紋花束已內含提袋不需選；其餘款式可選需要/不需要） -->
+  <div class="card" id="card-bag-addon">
     <div class="card-header">
       <span>🛍️ 加購配件</span>
       <span class="sec-badge">選購配件</span>
     </div>
-    <div class="sub-box" style="margin-top:0">
+    <!-- 情況 A: 此款式未附提袋，提供 需要/不需要 按鈕 -->
+    <div class="sub-box" id="box-bag-selector" style="margin-top:0">
       <div class="sub-title">
         <span>🛍️ 花束專屬提袋 ($40/個)</span>
-        <span id="bag-status-tip" style="color:#10b981;font-weight:bold;font-size:11px"></span>
+        <span style="font-size:11px;color:#d6304d;font-weight:bold">（此款式未附提袋）</span>
       </div>
-      <div class="btn-grid" id="grp-bag" style="grid-template-columns:repeat(3, 1fr)">
+      <div class="btn-grid" id="grp-bag" style="grid-template-columns:1fr 1fr">
         <button type="button" class="btn-opt active" onclick="selBag(this, 0)">不需要 ($0)</button>
-        <button type="button" class="btn-opt" onclick="selBag(this, 40)">加購 1 個 (+40)</button>
-        <button type="button" class="btn-opt" onclick="selBag(this, 80)">加購 2 個 (+80)</button>
+        <button type="button" class="btn-opt" onclick="selBag(this, 40)">需要提袋 (+40)</button>
+      </div>
+    </div>
+    <!-- 情況 B: 精緻款與條紋款，已內含提袋提示，直接隱藏選擇按鈕 -->
+    <div class="sub-box" id="box-bag-included" style="margin-top:0;display:none;background:#f0fdf4;border-color:#bbf7d0">
+      <div style="font-size:12.5px;color:#166534;font-weight:bold;display:flex;align-items:center;gap:6px">
+        <span>🛍️ 專屬提袋：</span>
+        <span style="color:#15803d;font-weight:800">此款式價格已內含專屬提袋，無需額外加購！</span>
       </div>
     </div>
   </div>
@@ -917,7 +924,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
       <span style="font-size:20px">💌</span>
       <div>
         <b>我們有附贈精美卡片！</b>
-        <div style="font-size:11.5px;color:#15803d;margin-top:1px">取貨當天可至門市現場親手書寫祝福語喔！如需專人代寫可於注意事項勾選代寫服務。</div>
+        <div style="font-size:11.5px;color:#15803d;margin-top:1px">取貨當天可至門市現場親手書寫祝福語喔！</div>
       </div>
     </div>
   </div>
@@ -1432,12 +1439,20 @@ function onSelectStyle(styleId) {
 }
 
 function updateBagStatusTip() {
-  let tip = e('bag-status-tip');
-  if(!tip) return;
-  if(fl.style === '精緻' || fl.style.startsWith('條紋')) {
-    tip.textContent = '🌟 此款式價格已內含專屬提袋！若需要額外提袋可再加購。';
+  let boxSelector = e('box-bag-selector');
+  let boxIncluded = e('box-bag-included');
+  let isIncluded = (fl.style === '精緻' || fl.style.startsWith('條紋'));
+
+  if(isIncluded) {
+    if(boxSelector) boxSelector.style.display = 'none';
+    if(boxIncluded) boxIncluded.style.display = 'block';
+    bagFee = 0; // 已內含提袋，不需加價
   } else {
-    tip.textContent = '（甜筒 / 透包 / 點點 款式未含提袋，可依需求加購）';
+    if(boxSelector) boxSelector.style.display = 'block';
+    if(boxIncluded) boxIncluded.style.display = 'none';
+    // 若原先選中加購按鈕維持原狀，否則重設為預設不需要
+    let activeBtn = e('grp-bag') ? e('grp-bag').querySelector('.btn-opt.active') : null;
+    bagFee = activeBtn && activeBtn.textContent.includes('40') ? 40 : 0;
   }
 }
 
@@ -1770,15 +1785,16 @@ function getOrderItems() {
   if(fl.style === '精緻' && fl.wrap !== '無指定(花藝師搭配)') sp.push('包裝:' + fl.wrap);
 
   items.push({
-    name: '🌸 ' + fl.style + (fl.style.includes('包裝') ? '' : '包裝花束'),
+    name: fl.style + (fl.style.includes('包裝') ? '' : '包裝花束'),
     desc: sp.join(' / '),
     price: flT
   });
 
-  if(bagFee > 0) {
-    items.push({ name: '🛍️ 花束專屬提袋', desc: bagFee >= 80 ? '加購 2 個' : '加購 1 個', price: bagFee });
-  } else if(fl.style === '精緻' || fl.style.startsWith('條紋')) {
-    items.push({ name: '🛍️ 專屬提袋', desc: '款式價格已內含', price: 0 });
+  let isIncluded = (fl.style === '精緻' || fl.style.startsWith('條紋'));
+  if(isIncluded) {
+    items.push({ name: '花束提袋', desc: '款式價格已內含', price: 0 });
+  } else if(bagFee > 0) {
+    items.push({ name: '花束提袋', desc: '加購', price: bagFee });
   }
 
   return items;
@@ -1851,9 +1867,9 @@ function buildLineMessage() {
 `【預訂品項與規格明細】\n` +
 `${itemsText}\n` +
 `----------------------------\n` +
-`💰 預估應付總額：${tot}\n` +
-`💌 門市附贈卡片：取貨時現場書寫\n` +
-`📍 取貨地址：台南市中西區友愛街93號\n` +
+`預估應付總額：${tot}\n` +
+`門市附贈卡片：取貨時現場書寫\n` +
+`取貨地址：台南市中西區友愛街93號\n` +
 `----------------------------\n` +
 `✅ 我已詳閱並同意梧藝IG花藝風格與訂購注意事項，請協助確認排單！謝謝！`;
 
