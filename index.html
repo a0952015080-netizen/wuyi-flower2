@@ -72,24 +72,89 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 }
 .store-meta b { color: #d6304d; }
 
-/* 管理者日期手動開關面板（連按3下彩蛋觸發） */
+/* 管理者日期日曆開關面板（連按3下彩蛋觸發） */
 .admin-date-box {
   display: none;
-  background: #fef3c7;
-  border: 1.5px dashed #d97706;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 12px;
-  font-size: 12px;
+  background: #fffbeb;
+  border: 2px solid #f59e0b;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 14px rgba(245,158,11,0.15);
+  animation: fadeIn 0.2s ease;
 }
-.admin-date-box h4 {
-  font-size: 13px;
-  color: #92400e;
-  margin-bottom: 6px;
+.admin-date-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px dashed #fcd34d;
 }
+.admin-date-header h4 {
+  font-size: 13.5px;
+  color: #92400e;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin-quick-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.admin-btn {
+  padding: 5px 8px;
+  font-size: 11.5px;
+  border: 1px solid #d97706;
+  background: #fff;
+  color: #92400e;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.1s;
+}
+.admin-btn:hover { background: #fef3c7; }
+
+/* 30天互動日期管理網格 */
+.admin-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 8px;
+}
+.admin-day-chip {
+  padding: 6px 2px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.25;
+  border: 1.5px solid transparent;
+  transition: all 0.12s;
+}
+.admin-day-chip.open {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+  font-weight: 800;
+}
+.admin-day-chip.closed {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+.admin-day-chip .d-num { font-size: 11.5px; font-weight: 900; }
+.admin-day-chip .d-status { font-size: 9px; margin-top: 2px; }
 
 /* 卡片容器 */
 .card {
@@ -608,7 +673,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
   justify-content: center;
 }
 
-/* 送單成功彈窗 Modal */
+/* LINE 完成彈窗 */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -679,7 +744,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 
   <!-- 1. 品牌 Header -->
   <div class="brand-header">
-    <span class="brand-badge" id="brand-badge-btn" onclick="onBadgeTripleClick()">🌸 官方線上預訂單</span>
+    <span class="brand-badge" id="brand-badge-btn" onclick="onBadgeTripleClick()" title="點擊三次開啟管理員日期設定">🌸 官方線上預訂單</span>
     <h1 class="brand-title">WUYI 梧藝花藝 門市花束預訂</h1>
     <p class="brand-sub">挑選專屬花束與提袋，確認注意事項後一鍵發送至 LINE 官方客服！</p>
     <div class="store-meta">
@@ -689,20 +754,23 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
     </div>
   </div>
 
-  <!-- 管理者彩蛋：連按三下彈出修改訂花日期/公休設定 -->
+  <!-- 管理者彩蛋面板：點擊即可切換每一天的可預訂/不可預訂 -->
   <div class="admin-date-box" id="admin-date-panel">
-    <h4>
-      <span>⚙️ 管理者模式：訂花取貨限制設定</span>
-      <button type="button" onclick="closeAdminPanel()" style="background:none;border:none;font-weight:bold;cursor:pointer;color:#92400e">✕ 關閉</button>
-    </h4>
-    <div style="line-height:1.6;margin-bottom:8px">
-      • 預設規則：一般花束限 2 天後至 30 天內（不可訂 2 天內），透明包裝花束則開放當天/隔天預訂。<br>
-      • 您可以在此暫時開啟「解除 2 天限制（允許任意日期）」或調整特定預設值。
+    <div class="admin-date-header">
+      <h4><span>⚙️ 管理者模式：設定每日可預訂狀態（點擊單日切換）</span></h4>
+      <button type="button" onclick="closeAdminPanel()" style="background:none;border:none;font-weight:bold;cursor:pointer;color:#92400e;font-size:14px">✕ 關閉</button>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button type="button" class="btn-opt" style="padding:4px 8px;font-size:11px" onclick="toggleDateRestriction(false)">🔓 允許所有日期（解除2天前限制）</button>
-      <button type="button" class="btn-opt" style="padding:4px 8px;font-size:11px" onclick="toggleDateRestriction(true)">🔒 恢復官方預設（2天內不能預訂）</button>
+    <div style="font-size:11.5px;color:#78350f;margin-bottom:8px;line-height:1.5">
+      💡 點擊下方未來 30 天日期方格，可直接切換「<span style="color:#059669;font-weight:bold">綠色：可預訂</span>」或「<span style="color:#dc2626;font-weight:bold">紅色：休假/額滿</span>」。設定將自動保存！
     </div>
+    <div class="admin-quick-row">
+      <button type="button" class="admin-btn" onclick="adminQuickSet('allOpen')">✅ 全部設為可預訂</button>
+      <button type="button" class="admin-btn" onclick="adminQuickSet('closeMondays')">🔒 週一全設公休</button>
+      <button type="button" class="admin-btn" onclick="adminQuickSet('closeTuesdays')">🔒 週二全設公休</button>
+      <button type="button" class="admin-btn" onclick="adminQuickSet('resetDefault')">🔄 恢復預設（週一休＋2天前）</button>
+    </div>
+    <!-- 30天互動日曆網格 -->
+    <div class="admin-days-grid" id="admin-days-grid"></div>
   </div>
 
   <!-- 2. 取貨人與時間資料 -->
@@ -741,6 +809,8 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
         </select>
       </div>
     </div>
+    <!-- 當日可否預訂狀態即時提示 -->
+    <div id="date-status-notice" style="display:none;margin-top:6px;padding:6px 10px;border-radius:6px;font-size:11.5px;font-weight:bold"></div>
   </div>
 
   <!-- 3. 花束款式選擇 -->
@@ -801,13 +871,11 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
         <span>📄 ③ 內襯紙選項 <span id="tissue-grid-tip" style="font-size:10.5px;color:#64748b;font-weight:normal"></span> <span id="tip-tissue" style="display:none;color:#ff4757;font-size:11px">(此款式不適用)</span></span>
         <span style="color:#d6304d;font-weight:800">+100 元</span>
       </div>
-      <!-- 襯紙類別：無襯紙 / 純色襯紙 / 網格襯紙 -->
       <div class="btn-grid" id="grp-tissue-type" style="grid-template-columns:repeat(3, 1fr);margin-bottom:6px">
         <button type="button" class="btn-opt active" onclick="setTissueType('none')">無襯紙 ($0)</button>
         <button type="button" class="btn-opt" onclick="setTissueType('solid')">純色襯紙 (+100)</button>
         <button type="button" class="btn-opt" onclick="setTissueType('grid')">網格襯紙 (+100)</button>
       </div>
-      <!-- 純色或網格可選之色系按鈕 -->
       <div class="color-grid" id="grp-tissue-colors" style="display:none"></div>
     </div>
 
@@ -942,6 +1010,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 // 設定與款式資料
 // ──────────────────────────────────────────────
 const LINE_OA_ID = "@230fpemy"; // WUYI 官方 LINE ID
+const DATE_CONFIG_KEY = "wuyi_date_status_map_v2";
 
 // 款式定義
 // 第一排3款：精緻包裝花束、透明包裝花束、點點包裝花束
@@ -965,45 +1034,35 @@ const ALL_STYLES = [...ROW1_STYLES, ...SUB_STYLES];
 
 // 色系設定
 const COLOR_DEF = {
-  // 1. 精緻：全部通用色系（最多3種）
   delicate: [
     {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
     {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'},{c:'other',n:'其他'}
   ],
-  // 2. 透包：最多選3種
   clear: [
     {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
     {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'},{c:'other',n:'其他'}
   ],
-  // 3. 條紋：只能選 藍、黃、粉
   stripe: [
     {c:'blue',n:'藍'},{c:'yellow',n:'黃'},{c:'pink',n:'粉'}
   ],
-  // 4. 甜筒軟紙版：粉、紫、黃、小花
   coneSoft: [
     {c:'pink',n:'粉'},{c:'purple',n:'紫'},{c:'yellow',n:'黃'},{c:'other',n:'小花'}
   ],
-  // 5. 甜筒硬紙版：粉、藍、黃、綠
   coneHard: [
     {c:'pink',n:'粉'},{c:'blue',n:'藍'},{c:'yellow',n:'黃'},{c:'green',n:'綠'}
   ],
-  // 6. 點點花束：固定包裝 白色 沒有選色
   dot: [
     {c:'white',n:'白色(固定)'}
   ]
 };
 
 // 襯紙專用色系
-// 網格襯紙：黑，紫，粉，綠，黄，米，白
 const TISSUE_GRID_COLORS = [
   {c:'black',n:'黑'},{c:'purple',n:'紫'},{c:'pink',n:'粉'},{c:'green',n:'綠'},{c:'yellow',n:'黃'},{c:'beige',n:'米'},{c:'white',n:'白'}
 ];
-// 純色襯紙：黑，紫，粉，綠，米，白，藍
 const TISSUE_SOLID_COLORS = [
   {c:'black',n:'黑'},{c:'purple',n:'紫'},{c:'pink',n:'粉'},{c:'green',n:'綠'},{c:'beige',n:'米'},{c:'white',n:'白'},{c:'blue',n:'藍'}
 ];
-
-// 外包裝色系（精緻花束專用）
 const WRAP_COLORS = [
   {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
   {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'},{c:'other',n:'其他'}
@@ -1018,20 +1077,141 @@ let fl = {
   coneHardFee: 0,
   colors: ['無指定(花藝師搭配)'],
   color: '無指定(花藝師搭配)',
-  tissueType: 'none', // 'none' | 'solid' | 'grid'
+  tissueType: 'none',
   tissueColor: '',
   tissueText: '無襯紙 ($0)',
   tFee: 0,
   wrap: '無指定(花藝師搭配)'
 };
 
-let bagFee = 0; // 提袋加購
-let restrictTwoDaysNotice = true; // 是否啟用2天限制
+let bagFee = 0;
+let dateStatusMap = {}; // 格式: { "2026-10-27": true(可訂)/false(不可訂) }
 let badgeClickCount = 0;
 let badgeClickTimer = null;
 
 const e = id => document.getElementById(id);
 const fmt = n => (parseFloat(n)||0).toLocaleString('zh-TW');
+
+// ──────────────────────────────────────────────
+// 每日預訂狀態自訂核心資料層 (支援 LocalStorage 持久化)
+// ──────────────────────────────────────────────
+function initDateStatusMap() {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(DATE_CONFIG_KEY));
+  } catch(err){}
+
+  if(saved && typeof saved === 'object') {
+    dateStatusMap = saved;
+  } else {
+    // 預設規則初始化未來 30 天：
+    // • 週一固定為不可訂 (false)
+    // • 其他日預設為可訂 (true)
+    generateDefaultDateMap();
+  }
+}
+
+function generateDefaultDateMap(allOpen = false) {
+  dateStatusMap = {};
+  let now = new Date();
+  for(let i = 0; i <= 35; i++) {
+    let d = new Date();
+    d.setDate(now.getDate() + i);
+    let dStr = toDateStr(d);
+    let dayOfWeek = d.getDay(); // 0:週日, 1:週一, 2:週二
+    if(allOpen) {
+      dateStatusMap[dStr] = true;
+    } else {
+      // 預設週一公休
+      dateStatusMap[dStr] = (dayOfWeek !== 1);
+    }
+  }
+  saveDateStatusMap();
+}
+
+function saveDateStatusMap() {
+  try {
+    localStorage.setItem(DATE_CONFIG_KEY, JSON.stringify(dateStatusMap));
+  } catch(err){}
+}
+
+// 查詢某一天是否被管理者標記為可訂
+function isDateOpen(dStr) {
+  if(dateStatusMap[dStr] !== undefined) {
+    return dateStatusMap[dStr];
+  }
+  // 未特意設定時，非週一預設可訂
+  let parts = dStr.split('-');
+  let d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  return d.getDay() !== 1;
+}
+
+// 切換某一天狀態
+function toggleSingleDay(dStr) {
+  let current = isDateOpen(dStr);
+  dateStatusMap[dStr] = !current;
+  saveDateStatusMap();
+  renderAdminDaysGrid();
+  updateDateLimits();
+}
+
+// 管理者快捷設定
+function adminQuickSet(action) {
+  let now = new Date();
+  if(action === 'allOpen') {
+    generateDefaultDateMap(true);
+  } else if(action === 'resetDefault') {
+    generateDefaultDateMap(false);
+  } else if(action === 'closeMondays') {
+    for(let i = 0; i <= 35; i++) {
+      let d = new Date();
+      d.setDate(now.getDate() + i);
+      if(d.getDay() === 1) dateStatusMap[toDateStr(d)] = false;
+    }
+    saveDateStatusMap();
+  } else if(action === 'closeTuesdays') {
+    for(let i = 0; i <= 35; i++) {
+      let d = new Date();
+      d.setDate(now.getDate() + i);
+      if(d.getDay() === 2) dateStatusMap[toDateStr(d)] = false;
+    }
+    saveDateStatusMap();
+  }
+  renderAdminDaysGrid();
+  updateDateLimits();
+}
+
+// 渲染管理員 30 天日期切換按鈕方格
+function renderAdminDaysGrid() {
+  let grid = e('admin-days-grid');
+  if(!grid) return;
+
+  const WEEK_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
+  let now = new Date();
+  let html = '';
+
+  for(let i = 0; i <= 30; i++) {
+    let d = new Date();
+    d.setDate(now.getDate() + i);
+    let dStr = toDateStr(d);
+    let dayOfWeek = d.getDay();
+    let isOpen = isDateOpen(dStr);
+
+    let mm = d.getMonth() + 1;
+    let dd = d.getDate();
+    let label = `${mm}/${dd}`;
+
+    html += `
+      <div class="admin-day-chip ${isOpen ? 'open' : 'closed'}" onclick="toggleSingleDay('${dStr}')" title="點擊切換 ${dStr} (${WEEK_NAMES[dayOfWeek]}) 狀態">
+        <span class="d-num">${label}</span>
+        <span style="font-size:9.5px;opacity:0.9">週${WEEK_NAMES[dayOfWeek]}</span>
+        <span class="d-status">${isOpen ? '🟢可訂' : '🔴休/滿'}</span>
+      </div>
+    `;
+  }
+
+  grid.innerHTML = html;
+}
 
 // ──────────────────────────────────────────────
 // 彩蛋按鈕：連按三下彈出修改訂花日期/公休設定
@@ -1045,6 +1225,7 @@ function onBadgeTripleClick() {
     badgeClickCount = 0;
     let panel = e('admin-date-panel');
     if(panel) {
+      renderAdminDaysGrid();
       panel.style.display = 'block';
       panel.scrollIntoView({ behavior: 'smooth' });
     }
@@ -1054,12 +1235,6 @@ function onBadgeTripleClick() {
 function closeAdminPanel() {
   let panel = e('admin-date-panel');
   if(panel) panel.style.display = 'none';
-}
-
-function toggleDateRestriction(en) {
-  restrictTwoDaysNotice = en;
-  alert(en ? '🔒 已恢復官方預設規則（不可訂2天內）！' : '🔓 已解除 2 天限制！開放預訂今天與隔天。');
-  updateDateLimits();
 }
 
 // ──────────────────────────────────────────────
@@ -1073,16 +1248,11 @@ function updateDateLimits() {
   let maxDate = new Date();
   maxDate.setDate(now.getDate() + 30); // 一個月內（30天）
 
-  let minDate = new Date();
   let isClear = (fl.style === '透包');
+  let minDaysAhead = isClear ? 0 : 2; // 透包可當天(0)，一般花束2天後(2)
 
-  if(!restrictTwoDaysNotice || isClear) {
-    // 透明包裝花束或管理員解除：當天可訂
-    minDate.setDate(now.getDate());
-  } else {
-    // 一般花束：2天內不可預訂（最快取貨日為 2 天後）
-    minDate.setDate(now.getDate() + 2);
-  }
+  let minDate = new Date();
+  minDate.setDate(now.getDate() + minDaysAhead);
 
   let minStr = toDateStr(minDate);
   let maxStr = toDateStr(maxDate);
@@ -1090,22 +1260,33 @@ function updateDateLimits() {
   dtInput.min = minStr;
   dtInput.max = maxStr;
 
-  // 提示文字更新
   let tipEl = e('date-tip');
   if(tipEl) {
     if(isClear) {
-      tipEl.textContent = '(韓系透包支援當天/隔天預訂，限1個月內)';
+      tipEl.textContent = '(韓系透包開放當天/隔天預訂，限1個月內)';
     } else {
       tipEl.textContent = '(需提前2天預訂，限1個月內)';
     }
   }
 
-  // 若當前所選日期早於最小日期或晚於最大日期，自動修正
-  if(!dtInput.value || dtInput.value < minStr || dtInput.value > maxStr) {
-    dtInput.value = minStr;
+  // 自動尋找最小可預訂的有效日期
+  if(!dtInput.value || dtInput.value < minStr || dtInput.value > maxStr || !isDateOpen(dtInput.value)) {
+    let nextAvailable = findNextAvailableDate(minDate, maxDate);
+    dtInput.value = nextAvailable || minStr;
   }
 
   validateSelectedDate(dtInput.value);
+}
+
+// 尋找範圍內第一個可預訂日
+function findNextAvailableDate(startDate, endDate) {
+  let cur = new Date(startDate.getTime());
+  while(cur <= endDate) {
+    let s = toDateStr(cur);
+    if(isDateOpen(s)) return s;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return toDateStr(startDate);
 }
 
 function toDateStr(d) {
@@ -1122,16 +1303,36 @@ function onDateChanged() {
 }
 
 function validateSelectedDate(dtVal) {
-  if(!dtVal) return;
+  let noticeEl = e('date-status-notice');
+  if(!dtVal || !noticeEl) return;
+
   let parts = dtVal.split('-');
   if(parts.length < 3) return;
   let picked = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
   let dayOfWeek = picked.getDay(); // 0:週日, 1:週一, 2:週二
 
-  if(dayOfWeek === 1) {
-    alert('⚠️ 提醒您：門市【每週一固定公休】，若需週一取貨請先透過官方 LINE 與花藝師確認是否能排單喔！');
+  let isOpen = isDateOpen(dtVal);
+
+  if(!isOpen) {
+    noticeEl.style.display = 'block';
+    noticeEl.style.background = '#fee2e2';
+    noticeEl.style.color = '#991b1b';
+    noticeEl.style.border = '1px solid #f87171';
+    noticeEl.innerHTML = `⚠️ 提醒您：【${dtVal}】門市目前設定為<b>公休或預訂已滿</b>，若送單可能無法為您排單，建議更換日期或至 LINE 洽詢！`;
+  } else if(dayOfWeek === 1) {
+    noticeEl.style.display = 'block';
+    noticeEl.style.background = '#fef3c7';
+    noticeEl.style.color = '#92400e';
+    noticeEl.style.border = '1px solid #fcd34d';
+    noticeEl.innerHTML = `💡 提醒您：門市【每週一固定公休】，您選取的日期若為排單特開，請於 LINE 送出後與花藝師確認取貨排程！`;
   } else if(dayOfWeek === 2) {
-    alert('💡 門市【週二為不定期公休】，送出預訂單後客服將為您核對確認當日是否營業！');
+    noticeEl.style.display = 'block';
+    noticeEl.style.background = '#fef3c7';
+    noticeEl.style.color = '#92400e';
+    noticeEl.style.border = '1px solid #fcd34d';
+    noticeEl.innerHTML = `💡 門市【週二為不定期公休】，送出預訂單後客服將為您核對確認當日是否正常營業。`;
+  } else {
+    noticeEl.style.display = 'none';
   }
 }
 
@@ -1273,13 +1474,12 @@ function setConePaper(btn, type, fee) {
   fl.coneHardFee = fee;
   e('cone-fee-tag').textContent = type === '硬紙' ? '立挺硬紙 (+50)' : '一般軟紙 ($0)';
 
-  // 甜筒軟紙與硬紙色系清單不同，需重新渲染
   renderColorButtons();
   calcTotal();
 }
 
 // ──────────────────────────────────────────────
-// 色系按鈕渲染（嚴格依需求 6, 9, 10, 11, 14 實作）
+// 色系按鈕渲染
 // ──────────────────────────────────────────────
 function renderColorButtons() {
   let grp = e('grp-fl-color');
@@ -1298,35 +1498,29 @@ function renderColorButtons() {
     maxCount = 3;
     typeTip.textContent = '可複選最多3種';
   } else if(fl.style === '透包') {
-    // 11. 透明包裝花束 最多色系選三種
     list = COLOR_DEF.clear;
     isMulti = true;
     maxCount = 3;
     typeTip.textContent = '最多色系選3種';
   } else if(fl.style.startsWith('條紋')) {
-    // 6. 條紋包裝花束 色系只能選 藍、黃、粉
     list = COLOR_DEF.stripe;
     isMulti = false;
     typeTip.textContent = '限定單選 (藍 / 黃 / 粉)';
   } else if(fl.style.startsWith('甜筒')) {
     if(fl.conePaper === '硬紙') {
-      // 10. 甜筒包裝花束硬紙版 色系為 粉、藍、黃、綠
       list = COLOR_DEF.coneHard;
       typeTip.textContent = '硬紙版限定單選';
     } else {
-      // 9. 甜筒包裝花束軟紙版 色系為 粉、紫、黃、小花
       list = COLOR_DEF.coneSoft;
       typeTip.textContent = '軟紙版限定單選';
     }
     isMulti = false;
   } else if(fl.style === '點點包裝') {
-    // 14. 點點包裝花束 只有固定包裝 白色 沒有選色
     list = COLOR_DEF.dot;
     isMulti = false;
     typeTip.textContent = '固定白底黑點包裝';
   }
 
-  // 重置色系為預設
   let defaultColor = list[0].n;
   fl.colors = [defaultColor];
   fl.color = defaultColor;
@@ -1347,14 +1541,12 @@ function onColorBtnClick(btn, val, isMulti, maxCount) {
   let boxOther = e('box-color-other');
 
   if(!isMulti) {
-    // 單選模式
     grp.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     fl.colors = [val];
     fl.color = val;
     if(boxOther) boxOther.style.display = 'none';
   } else {
-    // 複選模式（精緻款 / 透包款，最多3種）
     let noneVal = '無指定(花藝師搭配)';
     if(val === noneVal) {
       grp.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
@@ -1424,8 +1616,6 @@ function onColorOtherInput() {
 
 // ──────────────────────────────────────────────
 // 襯紙與外包裝顯示與選項設定
-// 12. 透明包裝花束 網格襯紙 顏色為黑，紫，粉，綠，黄，米，白
-// 13. 透明包裝花束 純色襯紙 色系為黑，紫，粉，綠，米，白，藍
 // ──────────────────────────────────────────────
 function updateTissueAndWrapVisibility() {
   let isTissueAllowed = (fl.style === '精緻' || fl.style === '透包');
@@ -1448,13 +1638,8 @@ function updateTissueAndWrapVisibility() {
   }
   if(tipWrap) tipWrap.style.display = isWrapAllowed ? 'none' : 'inline';
 
-  // 不適用時重置
-  if(!isTissueAllowed) {
-    setTissueType('none');
-  }
-  if(!isWrapAllowed) {
-    fl.wrap = '無指定(花藝師搭配)';
-  }
+  if(!isTissueAllowed) setTissueType('none');
+  if(!isWrapAllowed) fl.wrap = '無指定(花藝師搭配)';
 }
 
 function setTissueType(type) {
@@ -1481,13 +1666,11 @@ function setTissueType(type) {
     fl.tFee = 100;
     colorsBox.style.display = 'grid';
     if(tip) tip.textContent = '(請點選1種純色襯紙)';
-    // 純色襯紙清單：黑，紫，粉，綠，米，白，藍
     renderTissueColorBtns(TISSUE_SOLID_COLORS, '純色');
   } else if(type === 'grid') {
     fl.tFee = 100;
     colorsBox.style.display = 'grid';
     if(tip) tip.textContent = '(請點選1種網格襯紙顏色)';
-    // 網格襯紙清單：黑，紫，粉，綠，黄，米，白
     renderTissueColorBtns(TISSUE_GRID_COLORS, '網格');
   }
 
@@ -1517,9 +1700,6 @@ function onSelectTissueColor(btn, colorName, kindPrefix) {
   calcTotal();
 }
 
-// ──────────────────────────────────────────────
-// 外包裝選擇（精緻花束專用）
-// ──────────────────────────────────────────────
 function initWrapBtns() {
   let grp = e('grp-fl-wrap');
   if(!grp) return;
@@ -1557,9 +1737,7 @@ function onWrapOtherInput() {
   updatePreview();
 }
 
-// ──────────────────────────────────────────────
 // 加購提袋
-// ──────────────────────────────────────────────
 function selBag(btn, fee) {
   e('grp-bag').querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1597,7 +1775,6 @@ function getOrderItems() {
     price: flT
   });
 
-  // 提袋說明
   if(bagFee > 0) {
     items.push({ name: '🛍️ 花束專屬提袋', desc: bagFee >= 80 ? '加購 2 個' : '加購 1 個', price: bagFee });
   } else if(fl.style === '精緻' || fl.style.startsWith('條紋')) {
@@ -1683,7 +1860,6 @@ function buildLineMessage() {
   return msg;
 }
 
-// 複製明細
 function copyOrderText() {
   let msg = buildLineMessage();
   if(navigator.clipboard && navigator.clipboard.writeText) {
@@ -1734,9 +1910,15 @@ function submitToLine() {
     return;
   }
 
+  let dtVal = e('c-date').value;
+  if(dtVal && !isDateOpen(dtVal)) {
+    if(!confirm(`⚠️ 提醒：您選擇的取貨日期【${dtVal}】為公休日或預約已滿。\n確定仍要傳送訂單給官方 LINE 客服詢問排單嗎？`)) {
+      return;
+    }
+  }
+
   let msg = buildLineMessage();
 
-  // 自動複製到剪貼簿備援
   if(navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(msg).catch(() => {});
   }
@@ -1761,6 +1943,7 @@ function closeModal() {
 // ──────────────────────────────────────────────
 // 頁面初始化
 // ──────────────────────────────────────────────
+initDateStatusMap();
 renderStyles();
 initWrapBtns();
 onSelectStyle('精緻'); // 預設選中精緻包裝花束
