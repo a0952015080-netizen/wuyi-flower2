@@ -36,6 +36,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 
 /* 頂部品牌 Header */
 .brand-header {
+  position: relative;
   background: linear-gradient(135deg, #fff0f3 0%, #ffffff 60%, #f3f0ff 100%);
   border: 1.5px solid #fecdd3;
   border-radius: 16px;
@@ -43,6 +44,66 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
   margin-bottom: 12px;
   box-shadow: 0 4px 15px rgba(255,107,129,0.08);
   text-align: center;
+}
+.top-cloud-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+  user-select: none;
+  z-index: 10;
+}
+.top-cloud-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+  transform: translateY(-1px);
+}
+.top-cloud-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+.top-cloud-btn.checking {
+  background: #fefce8;
+  border-color: #fde047;
+  color: #854d0e;
+  cursor: wait;
+}
+.top-cloud-btn.connected {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+.top-cloud-btn.error {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+.top-cloud-btn .animate-spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+@media (max-width: 420px) {
+  .brand-header {
+    padding-top: 36px;
+  }
+  .top-cloud-btn {
+    top: 8px;
+    right: 8px;
+    font-size: 10.5px;
+    padding: 3px 8px;
+  }
 }
 .brand-badge {
   display: inline-block;
@@ -775,10 +836,14 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 
   <!-- 1. 品牌 Header -->
   <div class="brand-header">
+    <!-- 右上角 ☁️ 試算表檢查連線 -->
+    <button type="button" id="topCloudCheckBtn" class="top-cloud-btn" title="點擊檢查 Google 試算表連線狀態與同步日曆">
+      <span id="topCloudIcon">☁️</span>
+      <span id="topCloudText">試算表檢查連線</span>
+    </button>
+
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px">
-      <span class="brand-badge" id="brand-badge-btn" onclick="onBadgeTripleClick()" title="點擊三次開啟管理員日期設定">🌸 官方線上預訂單</span>
-      <!-- 1. 觸發按鈕（通常置於標題蛋糕處） -->
-      <span id="adminCakeBtn" class="cursor-pointer select-none active:scale-90 transition-transform text-xl p-0.5 rounded hover:bg-stone-100" title="管理設定">🎂</span>
+      <span class="brand-badge" id="brand-badge-btn" onclick="onBadgeTripleClick()" title="連點 3 次開啟管理員模式">🌸 官方線上預訂單</span>
     </div>
     <h1 class="brand-title">WUYI 梧藝花藝 門市花束預訂</h1>
     <p class="brand-sub">挑選專屬花束與提袋，確認注意事項後一鍵發送至 LINE 官方客服！</p>
@@ -797,7 +862,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
       <div id="adminStepAuth" class="space-y-3">
         <div class="flex items-center justify-between border-b pb-2">
           <h3 class="text-sm font-bold text-stone-800 flex items-center gap-1">
-            <span>🎂</span> 驗證店長密碼
+            <span>👑</span> 驗證店長密碼
           </h3>
           <button type="button" id="adminCloseAuthBtn" class="text-stone-400 hover:text-stone-600 text-lg leading-none">&times;</button>
         </div>
@@ -1291,7 +1356,9 @@ function initCalendar() {
 }
 
 // DOM 元素選取
-const adminCakeBtn = document.getElementById("adminCakeBtn");
+const topCloudCheckBtn = document.getElementById("topCloudCheckBtn");
+const topCloudIcon = document.getElementById("topCloudIcon");
+const topCloudText = document.getElementById("topCloudText");
 const adminModal = document.getElementById("adminModal");
 const adminStepAuth = document.getElementById("adminStepAuth");
 const adminStepPanel = document.getElementById("adminStepPanel");
@@ -1327,17 +1394,15 @@ function toHalfWidth(str) {
   return (str || "").replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0)).trim();
 }
 
-if (adminCakeBtn) {
-  adminCakeBtn.addEventListener("click", function() {
-    if (adminModal) adminModal.classList.remove("hidden");
-    if (adminStepAuth) adminStepAuth.classList.remove("hidden");
-    if (adminStepPanel) adminStepPanel.classList.add("hidden");
-    if (adminPwdError) adminPwdError.classList.add("hidden");
-    if (adminPwdInput) {
-      adminPwdInput.value = "";
-      setTimeout(() => adminPwdInput.focus(), 100);
-    }
-  });
+function openAdminModal() {
+  if (adminModal) adminModal.classList.remove("hidden");
+  if (adminStepAuth) adminStepAuth.classList.remove("hidden");
+  if (adminStepPanel) adminStepPanel.classList.add("hidden");
+  if (adminPwdError) adminPwdError.classList.add("hidden");
+  if (adminPwdInput) {
+    adminPwdInput.value = "";
+    setTimeout(() => adminPwdInput.focus(), 100);
+  }
 }
 
 function closeAdminModal() {
@@ -1385,7 +1450,7 @@ function onBadgeTripleClick() {
 
   if(badgeClickCount >= 3) {
     badgeClickCount = 0;
-    if (adminCakeBtn) adminCakeBtn.click();
+    openAdminModal();
   }
 }
 
@@ -1518,8 +1583,29 @@ if (adminQuickMonCloseBtn) {
 // ============================================
 // 4. Google 試算表 (GAS) 雲端連線與同步 API (區隔標記 flower category)
 // ============================================
+function updateTopCloudUI(state, text) {
+  if (topCloudCheckBtn) {
+    topCloudCheckBtn.className = "top-cloud-btn " + (state === 'checking' ? 'checking' : (state === 'connected' ? 'connected' : 'error'));
+  }
+  if (topCloudIcon) {
+    topCloudIcon.textContent = state === 'checking' ? '🔄' : (state === 'connected' ? '☁️' : '⚠️');
+    if (state === 'checking') topCloudIcon.classList.add("animate-spin");
+    else topCloudIcon.classList.remove("animate-spin");
+  }
+  if (topCloudText) {
+    topCloudText.textContent = text;
+  }
+}
+
+if (topCloudCheckBtn) {
+  topCloudCheckBtn.addEventListener("click", function() {
+    loadCalendarFromGAS(true);
+  });
+}
+
 // 從雲端讀取 (帶入 category=flower)
-async function loadCalendarFromGAS() {
+async function loadCalendarFromGAS(isManualCheck = false) {
+  updateTopCloudUI('checking', '連線檢查中...');
   try {
     if (cloudSyncStatus) {
       cloudSyncStatus.innerHTML = '<span class="animate-spin inline-block mr-1">🔄</span>同步中...';
@@ -1560,12 +1646,20 @@ async function loadCalendarFromGAS() {
         cloudSyncStatus.innerHTML = '☁️ Google 試算表已連線 (flower)';
         cloudSyncStatus.className = "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium flex items-center";
       }
+      updateTopCloudUI('connected', '試算表已連線');
+      if (isManualCheck) {
+        setTimeout(() => alert('✅ Google 試算表連線正常！最新花藝日曆已成功同步。'), 100);
+      }
     }
   } catch (err) {
     console.warn("無法取得 Google 試算表日曆資料，使用本機快取:", err);
     if (cloudSyncStatus) {
       cloudSyncStatus.innerHTML = '☁️ 使用本機快取 (離線 flower)';
       cloudSyncStatus.className = "text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-medium flex items-center";
+    }
+    updateTopCloudUI('error', '離線快取中');
+    if (isManualCheck) {
+      setTimeout(() => alert('⚠️ 目前無法連線至 Google 試算表（或網路連線不穩），系統已自動載入本機離線快取。'), 100);
     }
   }
 }
