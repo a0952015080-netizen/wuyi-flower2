@@ -1,0 +1,8 @@
+{
+  "minDaysNotice": 1,
+  "maxDaysAhead": 7,
+  "weeklyClosedDay": 1,
+  "closedDates": [],
+  "specialOpenDates": [],
+  "updatedAt": "2026-10-27T12:00:00Z"
+}
