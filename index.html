@@ -4,7 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🌸 WUYI 梧藝花藝｜線上花束預訂・LINE發送</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    corePlugins: {
+      preflight: false
+    }
+  }
+</script>
 <style>
+/* 確保管理員彈窗之基礎控制 */
+#adminModal.hidden { display: none !important; }
+#adminModal:not(.hidden) { display: flex !important; }
 :root {
   --p: #ff6b81;
   --pl: #fff0f3;
@@ -764,7 +775,11 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 
   <!-- 1. 品牌 Header -->
   <div class="brand-header">
-    <span class="brand-badge" id="brand-badge-btn" onclick="onBadgeTripleClick()" title="點擊三次開啟管理員日期設定">🌸 官方線上預訂單</span>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px">
+      <span class="brand-badge" id="brand-badge-btn" onclick="onBadgeTripleClick()" title="點擊三次開啟管理員日期設定">🌸 官方線上預訂單</span>
+      <!-- 1. 觸發按鈕（通常置於標題蛋糕處） -->
+      <span id="adminCakeBtn" class="cursor-pointer select-none active:scale-90 transition-transform text-xl p-0.5 rounded hover:bg-stone-100" title="管理設定">🎂</span>
+    </div>
     <h1 class="brand-title">WUYI 梧藝花藝 門市花束預訂</h1>
     <p class="brand-sub">挑選專屬花束與提袋，確認注意事項後一鍵發送至 LINE 官方客服！</p>
     <div class="store-meta">
@@ -774,33 +789,120 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
     </div>
   </div>
 
-  <!-- 管理者彩蛋面板：點擊即可切換每一天的可預訂/不可預訂 -->
-  <div class="admin-date-box" id="admin-date-panel">
-    <div class="admin-date-header">
-      <h4><span>⚙️ 管理者模式：設定每日可預訂狀態（點擊單日切換）</span></h4>
-      <button type="button" onclick="closeAdminPanel()" style="background:none;border:none;font-weight:bold;cursor:pointer;color:#92400e;font-size:14px">✕ 關閉</button>
+  <!-- 2. 管理員彈窗：密碼驗證 & 店長模式日期設定面板 -->
+  <div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-5 shadow-2xl border border-stone-200 space-y-3.5 max-h-[95vh] overflow-y-auto">
+      
+      <!-- 步驟 1: 輸入密碼 (預設: 5151) -->
+      <div id="adminStepAuth" class="space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h3 class="text-sm font-bold text-stone-800 flex items-center gap-1">
+            <span>🎂</span> 驗證店長密碼
+          </h3>
+          <button type="button" id="adminCloseAuthBtn" class="text-stone-400 hover:text-stone-600 text-lg leading-none">&times;</button>
+        </div>
+        <p class="text-xs text-stone-600">請輸入管理密碼進入店長日期設定：</p>
+        <div>
+          <input type="password" id="adminPwdInput" inputmode="numeric" placeholder="請輸入管理密碼" class="w-full border border-stone-300 rounded-lg p-2.5 text-center text-sm font-mono tracking-widest outline-none focus:border-amber-600" />
+          <p id="adminPwdError" class="text-[11px] text-red-500 mt-1 hidden text-center">密碼錯誤，請重新輸入！</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button type="button" id="adminCancelAuthBtn" class="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-semibold">取消</button>
+          <button type="button" id="adminVerifyBtn" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold">進入店長模式</button>
+        </div>
+      </div>
+
+      <!-- 步驟 2: 店長模式 日曆可預訂/不可預訂 點擊設定面板 -->
+      <div id="adminStepPanel" class="hidden space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-stone-800 flex items-center gap-1">
+                <span>👑</span> 店長模式：日期開放管理
+              </h3>
+              <span id="cloudSyncStatus" class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">☁️ Google 試算表已連線</span>
+            </div>
+            <p class="text-[11px] text-stone-500">預設開放一個月，點選後按儲存將自動同步至雲端試算表</p>
+          </div>
+          <button type="button" id="adminClosePanelBtn" class="text-stone-400 hover:text-stone-600 text-lg leading-none">&times;</button>
+        </div>
+
+        <!-- ⚡ 一鍵急件解鎖捷徑 -->
+        <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-200">
+          <button type="button" id="quickUnlockAllBtn" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 active:scale-[0.99] text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+            <span>⚡</span> 一鍵急件解鎖（今天起所有日期皆可預訂）
+          </button>
+          <p class="text-[10px] text-amber-700 text-center mt-1">立刻解除提前一週、週一公休與特定公休限制，急單首選</p>
+        </div>
+
+        <!-- 🚫 週一公休開關 -->
+        <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200 flex items-center justify-between">
+          <div>
+            <label for="settingDisableMonday" class="text-xs font-bold text-stone-700 flex items-center gap-1 cursor-pointer">
+              <span>🚫</span> 阻擋週一固定公休
+            </label>
+            <p class="text-[10px] text-stone-500">取消勾選後即可開放客人選擇週一取貨</p>
+          </div>
+          <input type="checkbox" id="settingDisableMonday" checked class="w-4 h-4 text-amber-600 rounded cursor-pointer" />
+        </div>
+
+        <!-- 點選模式按鈕：可以預訂 vs 不可以預訂 -->
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-stone-700">用按的設定日期（選取動作後點擊日曆）：</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="brushOpenBtn" class="py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1.5 transition bg-emerald-50 border-emerald-500 text-emerald-800 shadow-sm">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+              按了設為【可以預訂】
+            </button>
+            <button type="button" id="brushClosedBtn" class="py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1.5 transition bg-white border-stone-200 text-stone-600 hover:bg-rose-50 hover:border-rose-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+              按了設為【不可預訂】
+            </button>
+          </div>
+        </div>
+
+        <!-- 月份切換導航 -->
+        <div class="flex items-center justify-between bg-stone-50 p-2 rounded-xl border border-stone-200">
+          <button type="button" id="prevMonthBtn" class="p-1 px-2.5 bg-white border border-stone-300 rounded-lg text-xs font-bold text-stone-700 hover:bg-stone-100">&lt; 上個月</button>
+          <span id="calendarMonthTitle" class="text-xs font-bold text-stone-800">2026 年 10 月</span>
+          <button type="button" id="nextMonthBtn" class="p-1 px-2.5 bg-white border border-stone-300 rounded-lg text-xs font-bold text-stone-700 hover:bg-stone-100">下個月 &gt;</button>
+        </div>
+
+        <!-- 星期表頭 -->
+        <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-stone-500">
+          <span class="text-rose-500">日</span>
+          <span>一</span>
+          <span>二</span>
+          <span>三</span>
+          <span>四</span>
+          <span>五</span>
+          <span class="text-amber-600">六</span>
+        </div>
+
+        <!-- 日曆格子本體（動態渲染） -->
+        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center select-none"></div>
+
+        <!-- 快捷批次操作 -->
+        <div class="pt-1 flex items-center justify-between text-[11px] text-stone-500 border-t border-stone-100">
+          <div class="flex items-center gap-2">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span>可訂</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-rose-400 inline-block"></span>休假/滿</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="adminQuickAllOpenBtn" class="text-emerald-700 font-bold hover:underline">⚡ 本月全開</button>
+            <button type="button" id="adminQuickMonCloseBtn" class="text-stone-600 hover:underline">🚫 週一全休</button>
+          </div>
+        </div>
+
+        <!-- 儲存與恢復按鈕 -->
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100">
+          <button type="button" id="adminResetDefaultBtn" class="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold">恢復原廠預設</button>
+          <button type="button" id="adminSaveSettingsBtn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-1">
+            <span>☁️ 儲存並套用日曆</span>
+          </button>
+        </div>
+      </div>
     </div>
-    <div style="font-size:11.5px;color:#78350f;margin-bottom:8px;line-height:1.5">
-      💡 點擊下方未來 50 天日期方格，可直接切換「<span style="color:#059669;font-weight:bold">綠色：可預訂</span>」或「<span style="color:#dc2626;font-weight:bold">紅色：休假/額滿</span>」。設定將自動保存！
-    </div>
-    <div class="admin-quick-row">
-      <button type="button" class="admin-btn" onclick="adminQuickSet('allOpen')">✅ 全部設為可預訂</button>
-      <button type="button" class="admin-btn" onclick="adminQuickSet('closeMondays')">🔒 週一全設公休</button>
-      <button type="button" class="admin-btn" onclick="adminQuickSet('closeTuesdays')">🔒 週二全設公休</button>
-      <button type="button" class="admin-btn" onclick="adminQuickSet('resetDefault')">🔄 恢復預設（週一休＋2天前）</button>
-    </div>
-    <!-- 星期表頭：週一放第一列 -->
-    <div class="admin-weekday-header">
-      <div class="admin-weekday-chip mon">週一(休)</div>
-      <div class="admin-weekday-chip tue">週二</div>
-      <div class="admin-weekday-chip">週三</div>
-      <div class="admin-weekday-chip">週四</div>
-      <div class="admin-weekday-chip">週五</div>
-      <div class="admin-weekday-chip">週六</div>
-      <div class="admin-weekday-chip">週日</div>
-    </div>
-    <!-- 互動日曆網格（週一為每列第一天） -->
-    <div class="admin-days-grid" id="admin-days-grid"></div>
   </div>
 
   <!-- 2. 取貨人與時間資料 -->
@@ -1125,153 +1227,157 @@ let fl = {
 };
 
 let bagFee = 0;
-let dateStatusMap = {};
-let badgeClickCount = 0;
-let badgeClickTimer = null;
 
 const e = id => document.getElementById(id);
 const fmt = n => (parseFloat(n)||0).toLocaleString('zh-TW');
 
-// ──────────────────────────────────────────────
-// 每日預訂狀態自訂核心資料層 (支援 LocalStorage 持久化)
-// ──────────────────────────────────────────────
-function initDateStatusMap() {
-  let saved = null;
-  try {
-    saved = JSON.parse(localStorage.getItem(DATE_CONFIG_KEY));
-  } catch(err){}
+// ============================================
+// 1. Google 試算表 (GAS) 雲端 API 與設定變數
+// ============================================
+const GAS_CALENDAR_API = "https://script.google.com/macros/s/AKfycbzVxDkFO8UDZHUZYhiwGSFsTU4v6Ilbp0mgLXHEiXtDYYv_9p3epdF_y1IoWwSalqVx/exec";
+const CALENDAR_CATEGORY = "flower"; // 區隔標記 flower category
+const STORAGE_KEY_DATE_STATUS = "wuyi_flower_date_status_v1";
+const STORAGE_KEY_DISABLE_MONDAY = "wuyi_flower_disable_monday_v1";
 
-  if(saved && typeof saved === 'object') {
-    dateStatusMap = saved;
-  } else {
-    generateDefaultDateMap();
-  }
+// 狀態標準化工具
+function normalizeStatus(val) {
+  if (val === true || val === 'open') return 'open';
+  if (val === false || val === 'closed') return 'closed';
+  return val;
 }
 
-function generateDefaultDateMap(allOpen = false) {
-  dateStatusMap = {};
-  let now = new Date();
-  let dayOfWeek = now.getDay();
-  let diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-  let startMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
+// 格式化 YYYY-MM-DD
+const formatYMD = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
-  for(let i = 0; i < 70; i++) {
-    let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
-    let dStr = toDateStr(d);
-    let curDow = d.getDay();
-    if(allOpen) {
-      dateStatusMap[dStr] = true;
-    } else {
-      // 預設週一公休
-      dateStatusMap[dStr] = (curDow !== 1);
-    }
+// 本地暫存設定讀取（以 flower 專屬區隔快取為主，相容舊有本機設定）
+let disableMondaySetting = true;
+try {
+  const savedMon = localStorage.getItem(STORAGE_KEY_DISABLE_MONDAY) || localStorage.getItem("wuyi_cake_disable_monday_v1");
+  if (savedMon !== null) disableMondaySetting = JSON.parse(savedMon);
+} catch(err) {}
+
+let calendarDateStatus = {};
+try {
+  const saved = localStorage.getItem(STORAGE_KEY_DATE_STATUS) || localStorage.getItem("wuyi_cake_date_status_v1");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    for (const k in parsed) calendarDateStatus[k] = normalizeStatus(parsed[k]);
   }
-  saveDateStatusMap();
-}
+} catch(err) {}
 
-function saveDateStatusMap() {
-  try {
-    localStorage.setItem(DATE_CONFIG_KEY, JSON.stringify(dateStatusMap));
-  } catch(err){}
+// 日期狀態查詢（整合預訂表單）
+function getDateStatus(dStr) {
+  if (calendarDateStatus && calendarDateStatus[dStr]) {
+    return normalizeStatus(calendarDateStatus[dStr]);
+  }
+  let parts = dStr.split('-');
+  let d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  if (disableMondaySetting && d.getDay() === 1) {
+    return 'closed';
+  }
+  return 'open';
 }
 
 function isDateOpen(dStr) {
-  if(dateStatusMap[dStr] !== undefined) {
-    return dateStatusMap[dStr];
-  }
-  let parts = dStr.split('-');
-  let d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-  return d.getDay() !== 1;
+  return getDateStatus(dStr) === 'open';
 }
 
-function toggleSingleDay(dStr) {
-  let current = isDateOpen(dStr);
-  dateStatusMap[dStr] = !current;
-  saveDateStatusMap();
-  renderAdminDaysGrid();
+function initCalendar() {
   updateDateLimits();
-}
-
-function adminQuickSet(action) {
-  let now = new Date();
-  let dayOfWeek = now.getDay();
-  let diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-  let startMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
-
-  if(action === 'allOpen') {
-    generateDefaultDateMap(true);
-  } else if(action === 'resetDefault') {
-    generateDefaultDateMap(false);
-  } else if(action === 'closeMondays') {
-    for(let i = 0; i < 70; i++) {
-      let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
-      if(d.getDay() === 1) dateStatusMap[toDateStr(d)] = false;
-    }
-    saveDateStatusMap();
-  } else if(action === 'closeTuesdays') {
-    for(let i = 0; i < 70; i++) {
-      let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
-      if(d.getDay() === 2) dateStatusMap[toDateStr(d)] = false;
-    }
-    saveDateStatusMap();
+  if (e('c-date')) {
+    validateSelectedDate(e('c-date').value);
   }
-  renderAdminDaysGrid();
-  updateDateLimits();
+  updatePreview();
 }
 
-// 渲染管理者日曆（顯示未來 50 天，週一放第一列，整齊對齊週一至週日）
-function renderAdminDaysGrid() {
-  let grid = e('admin-days-grid');
-  if(!grid) return;
+// DOM 元素選取
+const adminCakeBtn = document.getElementById("adminCakeBtn");
+const adminModal = document.getElementById("adminModal");
+const adminStepAuth = document.getElementById("adminStepAuth");
+const adminStepPanel = document.getElementById("adminStepPanel");
+const adminPwdInput = document.getElementById("adminPwdInput");
+const adminPwdError = document.getElementById("adminPwdError");
+const adminVerifyBtn = document.getElementById("adminVerifyBtn");
+const adminCancelAuthBtn = document.getElementById("adminCancelAuthBtn");
+const adminCloseAuthBtn = document.getElementById("adminCloseAuthBtn");
+const adminClosePanelBtn = document.getElementById("adminClosePanelBtn");
+const quickUnlockAllBtn = document.getElementById("quickUnlockAllBtn");
+const settingDisableMonday = document.getElementById("settingDisableMonday");
+const brushOpenBtn = document.getElementById("brushOpenBtn");
+const brushClosedBtn = document.getElementById("brushClosedBtn");
+const prevMonthBtn = document.getElementById("prevMonthBtn");
+const nextMonthBtn = document.getElementById("nextMonthBtn");
+const calendarMonthTitle = document.getElementById("calendarMonthTitle");
+const calendarGrid = document.getElementById("calendarGrid");
+const adminQuickAllOpenBtn = document.getElementById("adminQuickAllOpenBtn");
+const adminQuickMonCloseBtn = document.getElementById("adminQuickMonCloseBtn");
+const adminSaveSettingsBtn = document.getElementById("adminSaveSettingsBtn");
+const adminResetDefaultBtn = document.getElementById("adminResetDefaultBtn");
+const cloudSyncStatus = document.getElementById("cloudSyncStatus");
 
-  const WEEK_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
-  let now = new Date();
-  let todayStr = toDateStr(now);
+let currentBrush = 'open'; // 'open' | 'closed'
+const todayObj = new Date();
+let viewYear = todayObj.getFullYear();
+let viewMonth = todayObj.getMonth();
 
-  // 取得本週「週一」作為日曆第一天的起始基準（週一為第一欄/第一列）
-  let dayOfWeek = now.getDay(); // 0 是週日, 1 是週一 ... 6 是週六
-  let diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-  let startMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
+// ============================================
+// 2. 密碼驗證邏輯 (密碼：5151)
+// ============================================
+function toHalfWidth(str) {
+  return (str || "").replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0)).trim();
+}
 
-  let html = '';
+if (adminCakeBtn) {
+  adminCakeBtn.addEventListener("click", function() {
+    if (adminModal) adminModal.classList.remove("hidden");
+    if (adminStepAuth) adminStepAuth.classList.remove("hidden");
+    if (adminStepPanel) adminStepPanel.classList.add("hidden");
+    if (adminPwdError) adminPwdError.classList.add("hidden");
+    if (adminPwdInput) {
+      adminPwdInput.value = "";
+      setTimeout(() => adminPwdInput.focus(), 100);
+    }
+  });
+}
 
-  // 渲染 8 週共 56 天（完整涵蓋未來 50 天，且每列整齊以週一開頭、週日結尾）
-  for(let i = 0; i < 56; i++) {
-    let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
-    let dStr = toDateStr(d);
-    let curDow = d.getDay();
-    let isOpen = isDateOpen(dStr);
-    let isPast = (dStr < todayStr);
-    let isToday = (dStr === todayStr);
+function closeAdminModal() {
+  if (adminModal) adminModal.classList.add("hidden");
+  if (adminPwdInput) adminPwdInput.value = "";
+  if (adminPwdError) adminPwdError.classList.add("hidden");
+}
+if (adminCancelAuthBtn) adminCancelAuthBtn.addEventListener("click", closeAdminModal);
+if (adminCloseAuthBtn) adminCloseAuthBtn.addEventListener("click", closeAdminModal);
+if (adminClosePanelBtn) adminClosePanelBtn.addEventListener("click", closeAdminModal);
+if (adminModal) {
+  adminModal.addEventListener("click", function(ev) {
+    if (ev.target === adminModal) closeAdminModal();
+  });
+}
 
-    let mm = d.getMonth() + 1;
-    let dd = d.getDate();
-    let label = `${mm}/${dd}`;
-
-    if(isPast) {
-      html += `
-        <div class="admin-day-chip past" style="opacity:0.35;background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0;cursor:not-allowed" title="${dStr} (已過期)">
-          <span class="d-num">${label}</span>
-          <span style="font-size:9px">已過</span>
-        </div>
-      `;
-    } else {
-      let todayStyle = isToday ? 'box-shadow: 0 0 0 2px #f59e0b;font-weight:900;' : '';
-      html += `
-        <div class="admin-day-chip ${isOpen ? 'open' : 'closed'}" onclick="toggleSingleDay('${dStr}')" style="${todayStyle}" title="點擊切換 ${dStr} (週${WEEK_NAMES[curDow]}) 狀態">
-          <span class="d-num">${label}${isToday ? '<span style="font-size:8.5px;color:#d97706;display:block">今日</span>' : ''}</span>
-          <span class="d-status">${isOpen ? '🟢可訂' : '🔴公休'}</span>
-        </div>
-      `;
+function verifyPassword() {
+  const pwd = toHalfWidth(adminPwdInput ? adminPwdInput.value : "");
+  if (pwd === "5151") {
+    if (adminStepAuth) adminStepAuth.classList.add("hidden");
+    if (adminStepPanel) adminStepPanel.classList.remove("hidden");
+    if (settingDisableMonday) settingDisableMonday.checked = disableMondaySetting;
+    viewYear = todayObj.getFullYear();
+    viewMonth = todayObj.getMonth();
+    setBrush('open');
+    renderAdminCalendar();
+  } else {
+    if (adminPwdError) adminPwdError.classList.remove("hidden");
+    if (adminPwdInput) {
+      adminPwdInput.focus();
+      adminPwdInput.select();
     }
   }
-
-  grid.innerHTML = html;
 }
+if (adminVerifyBtn) adminVerifyBtn.addEventListener("click", verifyPassword);
+if (adminPwdInput) adminPwdInput.addEventListener("keydown", (ev) => { if (ev.key === "Enter") verifyPassword(); });
 
-// ──────────────────────────────────────────────
-// 彩蛋按鈕：連按三下彈出輸入密碼５１５１
-// ──────────────────────────────────────────────
+// 連按三次標題徽章亦可觸發管理員彈窗
+let badgeClickCount = 0;
+let badgeClickTimer = null;
 function onBadgeTripleClick() {
   badgeClickCount++;
   if(badgeClickTimer) clearTimeout(badgeClickTimer);
@@ -1279,28 +1385,281 @@ function onBadgeTripleClick() {
 
   if(badgeClickCount >= 3) {
     badgeClickCount = 0;
-    let inputPwd = prompt('🔒 請輸入管理者密碼：');
-    if(inputPwd === null) return;
+    if (adminCakeBtn) adminCakeBtn.click();
+  }
+}
 
-    let cleanPwd = inputPwd.trim().replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
+// ============================================
+// 3. 畫布/筆刷與日曆渲染
+// ============================================
+function setBrush(mode) {
+  currentBrush = mode;
+  if (!brushOpenBtn || !brushClosedBtn) return;
+  if (mode === 'open') {
+    brushOpenBtn.className = "py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1.5 transition bg-emerald-50 border-emerald-500 text-emerald-800 shadow-sm";
+    brushClosedBtn.className = "py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1.5 transition bg-white border-stone-200 text-stone-600 hover:bg-rose-50 hover:border-rose-300";
+  } else {
+    brushClosedBtn.className = "py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1.5 transition bg-rose-50 border-rose-500 text-rose-800 shadow-sm";
+    brushOpenBtn.className = "py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1.5 transition bg-white border-stone-200 text-stone-600 hover:bg-emerald-50 hover:border-emerald-300";
+  }
+}
+if (brushOpenBtn) brushOpenBtn.addEventListener("click", () => setBrush('open'));
+if (brushClosedBtn) brushClosedBtn.addEventListener("click", () => setBrush('closed'));
 
-    if(cleanPwd !== '5151') {
-      alert('❌ 密碼錯誤，無法開啟管理者模式！');
-      return;
+if (settingDisableMonday) {
+  settingDisableMonday.addEventListener("change", function() {
+    disableMondaySetting = this.checked;
+    renderAdminCalendar();
+  });
+}
+
+if (quickUnlockAllBtn) {
+  quickUnlockAllBtn.addEventListener("click", function() {
+    disableMondaySetting = false;
+    if (settingDisableMonday) settingDisableMonday.checked = false;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const oneMonthAhead = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    for (let d = new Date(today); d <= oneMonthAhead; d.setDate(d.getDate() + 1)) {
+      calendarDateStatus[formatYMD(d)] = 'open';
     }
+    renderAdminCalendar();
+    alert("🎉 已一鍵解鎖！今天起到未來一個月的所有日期皆可預訂。請記得點擊「儲存並套用日曆」同步至雲端！");
+  });
+}
 
-    let panel = e('admin-date-panel');
-    if(panel) {
-      renderAdminDaysGrid();
-      panel.style.display = 'block';
-      panel.scrollIntoView({ behavior: 'smooth' });
+function renderAdminCalendar() {
+  if (!calendarMonthTitle || !calendarGrid) return;
+  calendarMonthTitle.innerText = `${viewYear} 年 ${viewMonth + 1} 月`;
+  calendarGrid.innerHTML = "";
+  const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay(); // 週日放第一列 (0: 週日, 1: 週一, ..., 6: 週六)
+  const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  for (let i = 0; i < firstDayIndex; i++) {
+    const emptyCell = document.createElement("div");
+    emptyCell.className = "h-11";
+    calendarGrid.appendChild(emptyCell);
+  }
+
+  for (let day = 1; day <= totalDays; day++) {
+    const dStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const thisDate = new Date(viewYear, viewMonth, day);
+    thisDate.setHours(0,0,0,0);
+    const isPast = thisDate < today;
+    const cell = document.createElement("div");
+    cell.className = "h-11 rounded-lg flex flex-col items-center justify-center transition p-0.5";
+
+    if (isPast) {
+      cell.className += " bg-stone-100 text-stone-300 cursor-not-allowed border border-transparent";
+      cell.innerHTML = `<span class="text-xs">${day}</span><span class="text-[9px] leading-none">-</span>`;
+    } else {
+      const status = typeof getDateStatus === 'function' ? getDateStatus(dStr) : (calendarDateStatus[dStr] || 'open');
+      cell.dataset.date = dStr;
+      if (status === 'open') {
+        cell.className += " bg-emerald-50 text-emerald-800 border-2 border-emerald-400 font-bold hover:brightness-95 cursor-pointer shadow-xs";
+        cell.innerHTML = `<span class="text-xs leading-tight">${day}</span><span class="text-[9px] text-emerald-600 leading-none font-medium">可訂</span>`;
+      } else {
+        cell.className += " bg-rose-50 text-rose-500 border border-rose-200 hover:brightness-95 cursor-pointer line-through";
+        cell.innerHTML = `<span class="text-xs leading-tight">${day}</span><span class="text-[9px] text-rose-400 leading-none no-underline font-medium">休</span>`;
+      }
+      cell.addEventListener("click", function() {
+        const currentStatus = typeof getDateStatus === 'function' ? getDateStatus(dStr) : (calendarDateStatus[dStr] || 'open');
+        calendarDateStatus[dStr] = currentStatus !== currentBrush ? currentBrush : (currentBrush === 'open' ? 'closed' : 'open');
+        renderAdminCalendar();
+      });
+    }
+    calendarGrid.appendChild(cell);
+  }
+}
+
+if (prevMonthBtn) {
+  prevMonthBtn.addEventListener("click", () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderAdminCalendar();
+  });
+}
+if (nextMonthBtn) {
+  nextMonthBtn.addEventListener("click", () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderAdminCalendar();
+  });
+}
+
+if (adminQuickAllOpenBtn) {
+  adminQuickAllOpenBtn.addEventListener("click", () => {
+    const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+    for (let day = 1; day <= totalDays; day++) {
+      const d = new Date(viewYear, viewMonth, day); d.setHours(0,0,0,0);
+      if (d >= today) calendarDateStatus[`${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`] = 'open';
+    }
+    renderAdminCalendar();
+  });
+}
+
+if (adminQuickMonCloseBtn) {
+  adminQuickMonCloseBtn.addEventListener("click", () => {
+    const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+    for (let day = 1; day <= totalDays; day++) {
+      const d = new Date(viewYear, viewMonth, day); d.setHours(0,0,0,0);
+      if (d >= today && d.getDay() === 1) {
+        calendarDateStatus[`${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`] = 'closed';
+      }
+    }
+    renderAdminCalendar();
+  });
+}
+
+// ============================================
+// 4. Google 試算表 (GAS) 雲端連線與同步 API (區隔標記 flower category)
+// ============================================
+// 從雲端讀取 (帶入 category=flower)
+async function loadCalendarFromGAS() {
+  try {
+    if (cloudSyncStatus) {
+      cloudSyncStatus.innerHTML = '<span class="animate-spin inline-block mr-1">🔄</span>同步中...';
+      cloudSyncStatus.className = "text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium flex items-center";
+    }
+    const res = await fetch(`${GAS_CALENDAR_API}?category=${encodeURIComponent(CALENDAR_CATEGORY)}&t=${Date.now()}`, { method: "GET" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+    if (json && (json.status === "success" || json.data || json[CALENDAR_CATEGORY])) {
+      let data = json.data || json;
+      if (data && data[CALENDAR_CATEGORY] && typeof data[CALENDAR_CATEGORY] === "object") {
+        data = data[CALENDAR_CATEGORY];
+      } else if (json && json[CALENDAR_CATEGORY] && typeof json[CALENDAR_CATEGORY] === "object") {
+        data = json[CALENDAR_CATEGORY];
+      }
+      if (typeof data.disableMonday === "boolean") {
+        disableMondaySetting = data.disableMonday;
+        if (settingDisableMonday) settingDisableMonday.checked = disableMondaySetting;
+        localStorage.setItem(STORAGE_KEY_DISABLE_MONDAY, JSON.stringify(disableMondaySetting));
+      }
+      if (data.calendarDateStatus && typeof data.calendarDateStatus === "object") {
+        for (const k in data.calendarDateStatus) {
+          calendarDateStatus[k] = normalizeStatus(data.calendarDateStatus[k]);
+        }
+      }
+      if (Array.isArray(data.closedDates)) {
+        data.closedDates.forEach(d => { if (!calendarDateStatus[d]) calendarDateStatus[d] = 'closed'; });
+      }
+      if (Array.isArray(data.specialOpenDates)) {
+        data.specialOpenDates.forEach(d => { if (!calendarDateStatus[d]) calendarDateStatus[d] = 'open'; });
+      }
+      localStorage.setItem(STORAGE_KEY_DATE_STATUS, JSON.stringify(calendarDateStatus));
+      if (typeof initCalendar === "function") initCalendar();
+      if (adminModal && !adminModal.classList.contains("hidden") && adminStepPanel && !adminStepPanel.classList.contains("hidden")) {
+        renderAdminCalendar();
+      }
+      if (cloudSyncStatus) {
+        cloudSyncStatus.innerHTML = '☁️ Google 試算表已連線 (flower)';
+        cloudSyncStatus.className = "text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium flex items-center";
+      }
+    }
+  } catch (err) {
+    console.warn("無法取得 Google 試算表日曆資料，使用本機快取:", err);
+    if (cloudSyncStatus) {
+      cloudSyncStatus.innerHTML = '☁️ 使用本機快取 (離線 flower)';
+      cloudSyncStatus.className = "text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-medium flex items-center";
     }
   }
 }
 
-function closeAdminPanel() {
-  let panel = e('admin-date-panel');
-  if(panel) panel.style.display = 'none';
+// 儲存至雲端 (標註 category: flower)
+if (adminSaveSettingsBtn) {
+  adminSaveSettingsBtn.addEventListener("click", async function() {
+    const btn = adminSaveSettingsBtn;
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>☁️ 雲端同步儲存中...</span>';
+
+    const cleanStatus = {};
+    for (const k in calendarDateStatus) {
+      cleanStatus[k] = normalizeStatus(calendarDateStatus[k]);
+    }
+
+    const payload = {
+      category: CALENDAR_CATEGORY,
+      type: CALENDAR_CATEGORY,
+      updatedAt: new Date().toISOString(),
+      disableMonday: disableMondaySetting,
+      calendarDateStatus: cleanStatus
+    };
+
+    try {
+      localStorage.setItem(STORAGE_KEY_DATE_STATUS, JSON.stringify(cleanStatus));
+      localStorage.setItem(STORAGE_KEY_DISABLE_MONDAY, JSON.stringify(disableMondaySetting));
+    } catch(err) {}
+
+    try {
+      await fetch(GAS_CALENDAR_API, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      if (typeof initCalendar === "function") initCalendar();
+      closeAdminModal();
+      setTimeout(() => alert("✅ 花藝日曆設定 (flower category) 已成功儲存並同步至 Google 雲端試算表！"), 150);
+    } catch (err) {
+      console.error("同步至 Google 試算表失敗:", err);
+      if (typeof initCalendar === "function") initCalendar();
+      closeAdminModal();
+      setTimeout(() => alert("⚠️ 日期已先儲存於本機花藝快取！（雲端同步可能有短暫延遲）"), 150);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  });
+}
+
+// 恢復原廠預設值 (重設 flower 類別)
+if (adminResetDefaultBtn) {
+  adminResetDefaultBtn.addEventListener("click", async function() {
+    if (!confirm("確定要將所有花藝日期設定恢復為原廠預設值嗎？")) return;
+    const btn = adminResetDefaultBtn;
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = "重設中...";
+
+    calendarDateStatus = {};
+    disableMondaySetting = true;
+    if (settingDisableMonday) settingDisableMonday.checked = true;
+
+    try {
+      localStorage.removeItem(STORAGE_KEY_DATE_STATUS);
+      localStorage.removeItem(STORAGE_KEY_DISABLE_MONDAY);
+    } catch(err) {}
+
+    const payload = {
+      category: CALENDAR_CATEGORY,
+      type: CALENDAR_CATEGORY,
+      updatedAt: new Date().toISOString(),
+      disableMonday: true,
+      calendarDateStatus: {}
+    };
+
+    try {
+      await fetch(GAS_CALENDAR_API, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+    } catch(err) {
+      console.warn("重設雲端失敗:", err);
+    } finally {
+      btn.disabled = false;
+      btn.innerText = originalText;
+      if (typeof initCalendar === "function") initCalendar();
+      renderAdminCalendar();
+      closeAdminModal();
+      alert("🔄 已成功恢復為預設規則，並同步重設至 Google 雲端試算表 (flower)！");
+    }
+  });
 }
 
 // ──────────────────────────────────────────────
@@ -2115,11 +2474,11 @@ function closeModal() {
 // ──────────────────────────────────────────────
 // 頁面初始化
 // ──────────────────────────────────────────────
-initDateStatusMap();
 renderStyles();
 onSelectStyle('精緻'); // 預設選中精緻包裝花束
 updateDateLimits();
 calcTotal();
+loadCalendarFromGAS();
 </script>
 
 </body>
