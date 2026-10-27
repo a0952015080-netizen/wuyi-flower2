@@ -118,12 +118,38 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 }
 .admin-btn:hover { background: #fef3c7; }
 
-/* 30天互動日期管理網格 */
+/* 30天互動日期管理網格（週一為第一列） */
+.admin-weekday-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+.admin-weekday-chip {
+  padding: 5px 2px;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.admin-weekday-chip.mon {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+.admin-weekday-chip.tue {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
 .admin-days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 5px;
-  margin-top: 8px;
 }
 .admin-day-chip {
   padding: 6px 2px;
@@ -755,7 +781,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
       <button type="button" onclick="closeAdminPanel()" style="background:none;border:none;font-weight:bold;cursor:pointer;color:#92400e;font-size:14px">✕ 關閉</button>
     </div>
     <div style="font-size:11.5px;color:#78350f;margin-bottom:8px;line-height:1.5">
-      💡 點擊下方未來 30 天日期方格，可直接切換「<span style="color:#059669;font-weight:bold">綠色：可預訂</span>」或「<span style="color:#dc2626;font-weight:bold">紅色：休假/額滿</span>」。設定將自動保存！
+      💡 點擊下方未來 50 天日期方格，可直接切換「<span style="color:#059669;font-weight:bold">綠色：可預訂</span>」或「<span style="color:#dc2626;font-weight:bold">紅色：休假/額滿</span>」。設定將自動保存！
     </div>
     <div class="admin-quick-row">
       <button type="button" class="admin-btn" onclick="adminQuickSet('allOpen')">✅ 全部設為可預訂</button>
@@ -763,23 +789,18 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
       <button type="button" class="admin-btn" onclick="adminQuickSet('closeTuesdays')">🔒 週二全設公休</button>
       <button type="button" class="admin-btn" onclick="adminQuickSet('resetDefault')">🔄 恢復預設（週一休＋2天前）</button>
     </div>
-    <!-- 30天互動日曆網格 -->
-    <div class="admin-days-grid" id="admin-days-grid"></div>
-    <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #d97706;">
-      <button type="button" id="btnSyncFlowerGithub" onclick="syncFlowerScheduleToGithub()" style="width:100%; background:#24292F; color:#fff; font-weight:bold; padding:12px; border-radius:10px; border:none; cursor:pointer; font-size:13px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
-        🚀 儲存並自動推送到 GitHub（同網址生效）
-      </button>
-      <div id="flowerSyncAlert" style="display:none; margin-top:8px; padding:8px; border-radius:6px; font-size:11.5px; font-weight:bold; text-align:center;"></div>
-      
-      <div style="margin-top:10px; padding:10px; background:#fff7ed; border-radius:8px; font-size:11.5px; border:1px solid #fed7aa;">
-        <div style="font-weight:bold; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
-          <span>🔑 GitHub Token 設定（只需填一次）</span>
-          <span id="flowerTokenStatus" style="font-size:10px; color:#2e7d32; font-weight:bold;"></span>
-        </div>
-        <input type="password" id="flowerTokenInput" placeholder="請貼上 ghp_ 開頭 Token" style="width:100%; padding:6px 8px; font-family:monospace; font-size:11.5px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; outline:none; background:#fff;" />
-        <div style="color:#9a3412; font-size:10px; margin-top:3px;">🔒 Token 僅安全存於您手機的瀏覽器中</div>
-      </div>
+    <!-- 星期表頭：週一放第一列 -->
+    <div class="admin-weekday-header">
+      <div class="admin-weekday-chip mon">週一(休)</div>
+      <div class="admin-weekday-chip tue">週二</div>
+      <div class="admin-weekday-chip">週三</div>
+      <div class="admin-weekday-chip">週四</div>
+      <div class="admin-weekday-chip">週五</div>
+      <div class="admin-weekday-chip">週六</div>
+      <div class="admin-weekday-chip">週日</div>
     </div>
+    <!-- 互動日曆網格（週一為每列第一天） -->
+    <div class="admin-days-grid" id="admin-days-grid"></div>
   </div>
 
   <!-- 2. 取貨人與時間資料 -->
@@ -800,7 +821,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
     </div>
     <div class="input-row">
       <div class="input-field">
-        <label>預計取貨日期 * <span id="date-tip" style="color:#d6304d;font-size:11px;font-weight:normal">(限1個月內)</span></label>
+        <label>預計取貨日期 * <span id="date-tip" style="color:#d6304d;font-size:11px;font-weight:normal">(限50天內)</span></label>
         <input type="date" class="input" id="c-date" onchange="onDateChanged()">
       </div>
       <div class="input-field">
@@ -1130,15 +1151,19 @@ function initDateStatusMap() {
 function generateDefaultDateMap(allOpen = false) {
   dateStatusMap = {};
   let now = new Date();
-  for(let i = 0; i <= 35; i++) {
-    let d = new Date();
-    d.setDate(now.getDate() + i);
+  let dayOfWeek = now.getDay();
+  let diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+  let startMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
+
+  for(let i = 0; i < 70; i++) {
+    let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
     let dStr = toDateStr(d);
-    let dayOfWeek = d.getDay();
+    let curDow = d.getDay();
     if(allOpen) {
       dateStatusMap[dStr] = true;
     } else {
-      dateStatusMap[dStr] = (dayOfWeek !== 1);
+      // 預設週一公休
+      dateStatusMap[dStr] = (curDow !== 1);
     }
   }
   saveDateStatusMap();
@@ -1169,21 +1194,23 @@ function toggleSingleDay(dStr) {
 
 function adminQuickSet(action) {
   let now = new Date();
+  let dayOfWeek = now.getDay();
+  let diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+  let startMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
+
   if(action === 'allOpen') {
     generateDefaultDateMap(true);
   } else if(action === 'resetDefault') {
     generateDefaultDateMap(false);
   } else if(action === 'closeMondays') {
-    for(let i = 0; i <= 35; i++) {
-      let d = new Date();
-      d.setDate(now.getDate() + i);
+    for(let i = 0; i < 70; i++) {
+      let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
       if(d.getDay() === 1) dateStatusMap[toDateStr(d)] = false;
     }
     saveDateStatusMap();
   } else if(action === 'closeTuesdays') {
-    for(let i = 0; i <= 35; i++) {
-      let d = new Date();
-      d.setDate(now.getDate() + i);
+    for(let i = 0; i < 70; i++) {
+      let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
       if(d.getDay() === 2) dateStatusMap[toDateStr(d)] = false;
     }
     saveDateStatusMap();
@@ -1192,185 +1219,51 @@ function adminQuickSet(action) {
   updateDateLimits();
 }
 
-async function loadRemoteFlowerSchedule() {
-  try {
-    const res = await fetch('./schedule.json?_t=' + Date.now());
-    if (res.ok) {
-      const remote = await res.json();
-      if (remote.closedDates && Array.isArray(remote.closedDates)) {
-        remote.closedDates.forEach(d => { dateStatusMap[d] = false; });
-      }
-      if (remote.specialOpenDates && Array.isArray(remote.specialOpenDates)) {
-        remote.specialOpenDates.forEach(d => { dateStatusMap[d] = true; });
-      }
-      saveDateStatusMap();
-      renderAdminDaysGrid();
-      updateDateLimits();
-      console.log('成功從 schedule.json 載入鮮花預訂日期！');
-    }
-  } catch (e) {
-    console.warn('載入 schedule.json 失敗', e);
-  }
-}
-
-async function syncFlowerScheduleToGithub() {
-  const tokenInput = document.getElementById("flowerTokenInput");
-  const token = (tokenInput ? tokenInput.value.trim() : "") || localStorage.getItem("wuyi_gh_token") || "";
-  const alertEl = document.getElementById("flowerSyncAlert");
-  const btn = document.getElementById("btnSyncFlowerGithub");
-
-  if (!token) {
-    alert("請先輸入您的 GitHub Token (ghp_...) 才能自動推送到 GitHub 喔！");
-    if (tokenInput) tokenInput.focus();
-    return;
-  }
-  localStorage.setItem("wuyi_gh_token", token);
-
-  btn.disabled = true;
-  btn.textContent = "⏳ 正在連線 GitHub API 更新中...";
-  alertEl.style.display = "block";
-  alertEl.style.background = "#eff6ff";
-  alertEl.style.color = "#1e40af";
-  alertEl.textContent = "正在將最新日期推送到 GitHub...";
-
-  try {
-    const repo = "a0952015080-netizen/wuyi-flower2";
-    const filePath = "schedule.json";
-    const branch = "main";
-
-    async function getFreshSha() {
-      const getUrl = `https://api.github.com/repos/${repo}/contents/${filePath}?ref=${branch}&_t=${Date.now()}`;
-      const getRes = await fetch(getUrl, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-      if (getRes.ok) {
-        const fileData = await getRes.json();
-        return fileData.sha;
-      }
-      return null;
-    }
-
-    let currentSha = await getFreshSha();
-
-    let closedDates = [];
-    let specialOpenDates = [];
-    for (let dStr in dateStatusMap) {
-      if (dateStatusMap[dStr] === false) {
-        closedDates.push(dStr);
-      } else if (dateStatusMap[dStr] === true) {
-        let parts = dStr.split('-');
-        let d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-        if (d.getDay() === 1) {
-          specialOpenDates.push(dStr);
-        }
-      }
-    }
-
-    const payload = {
-      minDaysNotice: 2,
-      maxDaysAhead: 30,
-      weeklyClosedDay: 1,
-      closedDates: closedDates,
-      specialOpenDates: specialOpenDates,
-      updatedAt: new Date().toISOString()
-    };
-
-    const jsonContent = JSON.stringify(payload, null, 2);
-    const base64Content = btoa(unescape(encodeURIComponent(jsonContent)));
-
-    const putUrl = `https://api.github.com/repos/${repo}/contents/${filePath}`;
-    let putBody = {
-      message: `update: 店長更新花藝預訂日期 (${new Date().toLocaleDateString('zh-TW')} ${new Date().toLocaleTimeString('zh-TW')})`,
-      content: base64Content,
-      branch: branch
-    };
-    if (currentSha) putBody.sha = currentSha;
-
-    let putRes = await fetch(putUrl, {
-      method: "PUT",
-      headers: {
-        "Authorization": "Bearer " + token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(putBody)
-    });
-
-    if (putRes.status === 409) {
-      currentSha = await getFreshSha();
-      if (currentSha) putBody.sha = currentSha;
-      putRes = await fetch(putUrl, {
-        method: "PUT",
-        headers: {
-          "Authorization": "Bearer " + token,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(putBody)
-      });
-    }
-
-    if (!putRes.ok) {
-      const errJson = await putRes.json().catch(() => ({}));
-      throw new Error(errJson.message || ("錯誤碼: " + putRes.status));
-    }
-
-    alertEl.style.background = "#ecfdf5";
-    alertEl.style.color = "#065f46";
-    alertEl.textContent = "🎉 推送成功！客人開啟同一連結即會載入最新日期！";
-    btn.textContent = "✅ 推送成功！已同步至 GitHub";
-
-    const tokenStatus = document.getElementById("flowerTokenStatus");
-    if (tokenStatus) tokenStatus.textContent = "已設定 Token ✓";
-
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = "🚀 儲存並自動推送到 GitHub（同網址生效）";
-    }, 3000);
-
-  } catch (err) {
-    alertEl.style.background = "#fef2f2";
-    alertEl.style.color = "#991b1b";
-    alertEl.textContent = "⚠️ 同步失敗：" + err.message;
-    btn.disabled = false;
-    btn.textContent = "🚀 儲存並自動推送到 GitHub（同網址生效）";
-  }
-}
-
-// 頁面啟動載入
-loadRemoteFlowerSchedule();
-setTimeout(() => {
-  const savedT = localStorage.getItem("wuyi_gh_token");
-  const tInp = document.getElementById("flowerTokenInput");
-  const tSta = document.getElementById("flowerTokenStatus");
-  if (savedT && tInp) tInp.value = savedT;
-  if (savedT && tSta) tSta.textContent = "已設定 Token ✓";
-}, 500);
-
+// 渲染管理者日曆（顯示未來 50 天，週一放第一列，整齊對齊週一至週日）
 function renderAdminDaysGrid() {
   let grid = e('admin-days-grid');
   if(!grid) return;
 
   const WEEK_NAMES = ['日', '一', '二', '三', '四', '五', '六'];
   let now = new Date();
+  let todayStr = toDateStr(now);
+
+  // 取得本週「週一」作為日曆第一天的起始基準（週一為第一欄/第一列）
+  let dayOfWeek = now.getDay(); // 0 是週日, 1 是週一 ... 6 是週六
+  let diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+  let startMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
+
   let html = '';
 
-  for(let i = 0; i <= 30; i++) {
-    let d = new Date();
-    d.setDate(now.getDate() + i);
+  // 渲染 8 週共 56 天（完整涵蓋未來 50 天，且每列整齊以週一開頭、週日結尾）
+  for(let i = 0; i < 56; i++) {
+    let d = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + i);
     let dStr = toDateStr(d);
-    let dayOfWeek = d.getDay();
+    let curDow = d.getDay();
     let isOpen = isDateOpen(dStr);
+    let isPast = (dStr < todayStr);
+    let isToday = (dStr === todayStr);
 
     let mm = d.getMonth() + 1;
     let dd = d.getDate();
     let label = `${mm}/${dd}`;
 
-    html += `
-      <div class="admin-day-chip ${isOpen ? 'open' : 'closed'}" onclick="toggleSingleDay('${dStr}')" title="點擊切換 ${dStr} (${WEEK_NAMES[dayOfWeek]}) 狀態">
-        <span class="d-num">${label}</span>
-        <span style="font-size:9.5px;opacity:0.9">週${WEEK_NAMES[dayOfWeek]}</span>
-        <span class="d-status">${isOpen ? '🟢可訂' : '🔴休/滿'}</span>
-      </div>
-    `;
+    if(isPast) {
+      html += `
+        <div class="admin-day-chip past" style="opacity:0.35;background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0;cursor:not-allowed" title="${dStr} (已過期)">
+          <span class="d-num">${label}</span>
+          <span style="font-size:9px">已過</span>
+        </div>
+      `;
+    } else {
+      let todayStyle = isToday ? 'box-shadow: 0 0 0 2px #f59e0b;font-weight:900;' : '';
+      html += `
+        <div class="admin-day-chip ${isOpen ? 'open' : 'closed'}" onclick="toggleSingleDay('${dStr}')" style="${todayStyle}" title="點擊切換 ${dStr} (週${WEEK_NAMES[curDow]}) 狀態">
+          <span class="d-num">${label}${isToday ? '<span style="font-size:8.5px;color:#d97706;display:block">今日</span>' : ''}</span>
+          <span class="d-status">${isOpen ? '🟢可訂' : '🔴公休'}</span>
+        </div>
+      `;
+    }
   }
 
   grid.innerHTML = html;
@@ -1419,7 +1312,7 @@ function updateDateLimits() {
 
   let now = new Date();
   let maxDate = new Date();
-  maxDate.setDate(now.getDate() + 30);
+  maxDate.setDate(now.getDate() + 50);
 
   let isClear = (fl.style === '透包');
   let minDaysAhead = isClear ? 0 : 2;
@@ -1436,9 +1329,9 @@ function updateDateLimits() {
   let tipEl = e('date-tip');
   if(tipEl) {
     if(isClear) {
-      tipEl.textContent = '(韓系透包開放當天/隔天預訂，限1個月內)';
+      tipEl.textContent = '(韓系透包開放當天/隔天預訂，限50天內)';
     } else {
-      tipEl.textContent = '(需提前2天預訂，限1個月內)';
+      tipEl.textContent = '(需提前2天預訂，限50天內)';
     }
   }
 
