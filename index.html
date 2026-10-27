@@ -220,7 +220,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
   margin-top: 2px;
 }
 
-/* 款式區塊：第一排3款（精緻、透包、點點）、其餘款式（甜筒、條紋） */
+/* 款式區塊：第一排3款（精緻、透包、點點）、第二排3款（線條、甜筒軟紙、甜筒硬紙） */
 .gallery-section-title {
   font-size: 12px;
   font-weight: 800;
@@ -230,21 +230,14 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
   align-items: center;
   gap: 4px;
 }
-.style-gallery-row1 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.style-gallery-sub {
+.style-gallery-row1, .style-gallery-sub {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 10px;
 }
 @media (max-width: 480px) {
-  .style-gallery-row1 { grid-template-columns: repeat(3, 1fr); }
-  .style-gallery-sub { grid-template-columns: repeat(3, 1fr); }
+  .style-gallery-row1, .style-gallery-sub { grid-template-columns: repeat(3, 1fr); }
 }
 
 .style-card {
@@ -332,7 +325,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
   line-height: 1.25;
 }
 .style-price {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 900;
   color: var(--ac);
   margin-top: 3px;
@@ -400,6 +393,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
 .c-orange{--cbg:#ff9f43;--cc:#fff;--cb:#d3731a}
 .c-black{--cbg:#222f3e;--cc:#fff;--cb:#000}
 .c-grid{--cbg:repeating-linear-gradient(0deg,#f5f6fa,#f5f6fa 2px,#dcdde1 2px,#dcdde1 4px);--cc:#222;--cb:#57606f}
+.c-pattern{--cbg:radial-gradient(circle, #ff6b81 25%, #fed330 25%, #fed330 50%, #ff9f43 50%);--cc:#222;--cb:#e67e22}
 .c-other{--cbg:linear-gradient(135deg,#a55eea,#45aaf2);--cc:#fff;--cb:#3867d6}
 
 /* 輸入框 */
@@ -826,38 +820,41 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
     </div>
     <div class="style-gallery-row1" id="gallery-row1"></div>
 
-    <!-- 其餘款式：甜筒 (S/M/L) 與 條紋 (S/M/L) -->
+    <!-- 第二排：線條包裝 / 甜筒軟紙 / 甜筒硬紙 -->
     <div class="gallery-section-title">
-      <span>🍦 甜筒系列 & 條紋包裝花束</span>
+      <span>🌿 線條包裝 & 甜筒花束系列</span>
     </div>
     <div class="style-gallery-sub" id="gallery-sub"></div>
 
-    <!-- 甜筒硬紙／軟紙切換 -->
-    <div class="sub-box" id="sec-cone-paper" style="display:none;background:#f3f0ff;border-color:#b8a2ff">
-      <div class="sub-title" style="color:var(--f)">
-        <span>🍦 甜筒紙材版本</span>
-        <span id="cone-fee-tag" style="color:#d6304d;font-weight:800">一般軟紙 ($0)</span>
-      </div>
-      <div class="btn-grid" id="grp-cone-paper" style="grid-template-columns:1fr 1fr">
-        <button type="button" class="btn-opt active" onclick="setConePaper(this, '軟紙', 0)">軟紙版 ($0)</button>
-        <button type="button" class="btn-opt" onclick="setConePaper(this, '硬紙', 50)">立挺硬紙版 (+50)</button>
-      </div>
-    </div>
-
-    <!-- ⑤ 鮮花價格（精緻 / 透包） -->
+    <!-- 鮮花價格 / 規格 -->
     <div class="sub-box" id="sec-price" style="margin-top:8px">
       <div class="sub-title">
         <span>💰 鮮花預算/規格 <span id="fl-price-tip" style="font-weight:normal;color:#64748b"></span></span>
         <span id="tip-price" style="display:none;color:#ff4757;font-size:11px">(定價花束不可更動)</span>
       </div>
-      <div class="btn-grid" id="grp-fl-price" style="grid-template-columns:repeat(3, 1fr)"></div>
+
+      <!-- 規格按鈕區（線條包裝 SML、甜筒軟紙 SML、甜筒硬紙 SML、點點包裝固定） -->
+      <div class="btn-grid" id="grp-fl-price"></div>
+
+      <!-- 自填預算輸入欄（精緻自填 $1280~3000、透包自填最低 $390 起） -->
+      <div id="box-custom-price" style="display:none;margin-top:4px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:13px;font-weight:800;color:#1e293b" id="lbl-custom-price">您的鮮花預算：</span>
+          <div style="position:relative;flex:1;max-width:220px">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-weight:900;color:var(--ac);font-size:14px">NT$</span>
+            <input type="number" class="input" id="inp-custom-price" placeholder="填寫金額" style="padding-left:45px;font-size:15px;font-weight:900;color:var(--ac)" oninput="onCustomPriceInput()">
+          </div>
+          <span style="font-size:13px;font-weight:800;color:#1e293b">元</span>
+        </div>
+        <div id="tip-custom-price-range" style="font-size:11.5px;color:#d6304d;margin-top:6px;line-height:1.4"></div>
+      </div>
     </div>
 
-    <!-- ② 色系選擇 -->
+    <!-- ② 色系選擇（花材主色系） -->
     <div class="sub-box" id="sec-color" style="margin-top:8px">
       <div class="sub-title">
-        <span>🎨 ② 主色系選擇 <span id="color-count-tag" style="color:#8854d0;font-size:11px"></span></span>
-        <span id="color-type-tip" style="font-size:10px;background:#e2e8f0;padding:1px 6px;border-radius:4px">免費搭配</span>
+        <span>🎨 ② 花材主色系選擇 <span id="color-count-tag" style="color:#8854d0;font-size:11px"></span></span>
+        <span id="color-type-tip" style="font-size:10px;background:#e2e8f0;padding:1px 6px;border-radius:4px">花材色系可複選最多3種</span>
       </div>
       <div class="color-grid" id="grp-fl-color"></div>
       <div class="other-input-box" id="box-color-other">
@@ -865,7 +862,7 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
       </div>
     </div>
 
-    <!-- ③ 襯紙選項 (+100) (僅精緻與透包適用) -->
+    <!-- ③ 襯紙選項 (+100)（僅透明包裝花束適用，精緻與其他款式不顯示） -->
     <div class="sub-box" id="sec-tissue" style="margin-top:8px">
       <div class="sub-title">
         <span>📄 ③ 內襯紙選項 <span id="tissue-grid-tip" style="font-size:10.5px;color:#64748b;font-weight:normal"></span> <span id="tip-tissue" style="display:none;color:#ff4757;font-size:11px">(此款式不適用)</span></span>
@@ -879,11 +876,11 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
       <div class="color-grid" id="grp-tissue-colors" style="display:none"></div>
     </div>
 
-    <!-- ④ 外包裝紙選項 (精緻包裝專用) -->
+    <!-- ④ 包裝紙選項（精緻外包裝、線條包裝色系、甜筒軟紙包裝、甜筒硬紙包裝） -->
     <div class="sub-box" id="sec-wrap" style="margin-top:8px">
       <div class="sub-title">
-        <span>🎁 ④ 外包裝紙選項 <span id="tip-wrap" style="display:none;color:#ff4757;font-size:11px">(此款式不適用)</span></span>
-        <span style="font-size:10px;background:#e2e8f0;padding:1px 6px;border-radius:4px">免費選色</span>
+        <span id="title-wrap">🎁 ④ 外包裝紙選項</span>
+        <span id="tip-wrap-type" style="font-size:10px;background:#e2e8f0;padding:1px 6px;border-radius:4px">免費選色</span>
       </div>
       <div class="color-grid" id="grp-fl-wrap"></div>
       <div class="other-input-box" id="box-wrap-other">
@@ -892,28 +889,28 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
     </div>
   </div>
 
-  <!-- 4. 加購商品（精緻與條紋花束已內含提袋不需選；其餘款式可選需要/不需要） -->
+  <!-- 4. 加購配件（精緻、點點、線條已內含提袋；透明包裝、甜筒軟紙、甜筒硬紙需加購$40） -->
   <div class="card" id="card-bag-addon">
     <div class="card-header">
-      <span>🛍️ 加購配件</span>
-      <span class="sec-badge">選購配件</span>
+      <span>🛍️ 提袋配件</span>
+      <span class="sec-badge">專屬配件</span>
     </div>
     <!-- 情況 A: 此款式未附提袋，提供 需要/不需要 按鈕 -->
     <div class="sub-box" id="box-bag-selector" style="margin-top:0">
       <div class="sub-title">
         <span>🛍️ 花束專屬提袋 ($40/個)</span>
-        <span style="font-size:11px;color:#d6304d;font-weight:bold">（此款式未附提袋）</span>
+        <span style="font-size:11px;color:#d6304d;font-weight:bold">（此款式未附提袋，可依需求加購）</span>
       </div>
       <div class="btn-grid" id="grp-bag" style="grid-template-columns:1fr 1fr">
         <button type="button" class="btn-opt active" onclick="selBag(this, 0)">不需要 ($0)</button>
         <button type="button" class="btn-opt" onclick="selBag(this, 40)">需要提袋 (+40)</button>
       </div>
     </div>
-    <!-- 情況 B: 精緻款與條紋款，已內含提袋提示，直接隱藏選擇按鈕 -->
+    <!-- 情況 B: 精緻、點點、線條已送提袋 -->
     <div class="sub-box" id="box-bag-included" style="margin-top:0;display:none;background:#f0fdf4;border-color:#bbf7d0">
       <div style="font-size:12.5px;color:#166534;font-weight:bold;display:flex;align-items:center;gap:6px">
         <span>🛍️ 專屬提袋：</span>
-        <span style="color:#15803d;font-weight:800">此款式價格已內含專屬提袋，無需額外加購！</span>
+        <span style="color:#15803d;font-weight:800">🎉 本款式免費贈送專屬提袋，無需額外加購！</span>
       </div>
     </div>
   </div>
@@ -952,7 +949,8 @@ body { background: var(--bg); color: var(--t); padding: 12px 10px 110px; line-he
     </div>
     <div class="terms-content">
       <ul>
-        <li><b>鮮花花束價格包含提袋</b>（精緻包裝與條紋花束價格已包含專屬提袋）。</li>
+        <li><b>精緻包裝、點點包裝、線條包裝花束已包含專屬提袋</b>。</li>
+        <li><b>透明包裝與甜筒系列未附提袋</b>，如有需要可於表單加購 $40/個。</li>
         <li><b>可代寫卡片祝福語</b>（10字內 $30，若需要請於 LINE 告知）。</li>
         <li>以上方案皆為闆娘設計<b>『 不指定花材 & 不指定樣式設計』</b>。</li>
         <li>以上鮮花花束方案依照當季鮮花花材與訂購日時價去計算。</li>
@@ -1022,66 +1020,65 @@ const DATE_CONFIG_KEY = "wuyi_date_status_map_v2";
 // 款式定義
 // 第一排3款：精緻包裝花束、透明包裝花束、點點包裝花束
 const ROW1_STYLES = [
-  { id: '精緻', name: '精緻包裝花束', img: 'images/精緻包裝花束.jpeg', priceText: '$1,280 起', defaultPrice: 1280, isSpec: false, type: 'delicate' },
-  { id: '透包', name: '透明包裝花束', img: 'images/透明包裝花束.jpeg', priceText: '$390 起', defaultPrice: 390, isSpec: false, type: 'clear' },
-  { id: '點點包裝', name: '點點包裝花束', img: 'images/點點包装花束.jpeg', priceText: '$1,150', defaultPrice: 1150, isSpec: true, type: 'dot' }
+  { id: '精緻', name: '精緻包裝花束', img: 'images/精緻包裝花束.jpeg', priceText: '$1,280~3,000 (自填)', defaultPrice: 1280 },
+  { id: '透包', name: '透明包裝花束', img: 'images/透明包裝花束.jpeg', priceText: '$390 起 (自填)', defaultPrice: 390 },
+  { id: '點點包裝', name: '點點包裝花束', img: 'images/點點包装花束.jpeg', priceText: '$1,150 (固定)', defaultPrice: 1150 }
 ];
 
-// 其餘款式：甜筒 (S/M/L) 與 條紋 (S/M/L)
+// 第二排3款：線條包裝（條紋單一選項）、甜筒軟紙（單一選項）、甜筒硬紙（單一選項）
 const SUB_STYLES = [
-  { id: '甜筒 S', name: '甜筒花束 S', img: 'images/甜筒包裝花束1.jpeg', priceText: '$500', defaultPrice: 500, isSpec: true, type: 'cone' },
-  { id: '甜筒 M', name: '甜筒花束 M', img: 'images/甜筒包裝花束2.jpeg', priceText: '$700', defaultPrice: 700, isSpec: true, type: 'cone' },
-  { id: '甜筒 L', name: '甜筒花束 L', img: 'images/甜筒包裝花束1.jpeg', priceText: '$900', defaultPrice: 900, isSpec: true, type: 'cone' },
-  { id: '條紋 S', name: '條紋包裝花束 S', img: 'images/條紋包裝花束.jpeg', priceText: '$680', defaultPrice: 680, isSpec: true, type: 'stripe' },
-  { id: '條紋 M', name: '條紋包裝花束 M', img: 'images/條紋包裝花束.jpeg', priceText: '$880', defaultPrice: 880, isSpec: true, type: 'stripe' },
-  { id: '條紋 L', name: '條紋包裝花束 L', img: 'images/條紋包裝花束.jpeg', priceText: '$1,200', defaultPrice: 1200, isSpec: true, type: 'stripe' }
+  { id: '線條包裝', name: '線條包裝花束', img: 'images/條紋包裝花束.jpeg', priceText: 'S$680 / M$880 / L$1200', defaultPrice: 680 },
+  { id: '甜筒軟紙', name: '甜筒花束 (軟紙)', img: 'images/甜筒包裝花束1.jpeg', priceText: 'S$500 / M$700 / L$900', defaultPrice: 500 },
+  { id: '甜筒硬紙', name: '甜筒花束 (硬紙)', img: 'images/甜筒包裝花束2.jpeg', priceText: 'S$550 / M$750 / L$950', defaultPrice: 550 }
 ];
 
 const ALL_STYLES = [...ROW1_STYLES, ...SUB_STYLES];
 
-// 色系設定
+// 色系設定（花材主色系：9 種基礎色）
+const FLOWER_COLORS_COMMON = [
+  {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
+  {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'}
+];
+
 const COLOR_DEF = {
-  delicate: [
-    {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
-    {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'},{c:'other',n:'其他'}
-  ],
-  clear: [
-    {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
-    {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'},{c:'other',n:'其他'}
-  ],
-  stripe: [
-    {c:'blue',n:'藍'},{c:'yellow',n:'黃'},{c:'pink',n:'粉'}
-  ],
-  coneSoft: [
-    {c:'pink',n:'粉'},{c:'purple',n:'紫'},{c:'yellow',n:'黃'},{c:'other',n:'小花'}
-  ],
-  coneHard: [
-    {c:'pink',n:'粉'},{c:'blue',n:'藍'},{c:'yellow',n:'黃'},{c:'green',n:'綠'}
-  ],
-  dot: [
-    {c:'white',n:'白色(固定)'}
-  ]
+  '精緻': [...FLOWER_COLORS_COMMON, {c:'other',n:'其他'}],
+  '透包': [...FLOWER_COLORS_COMMON, {c:'other',n:'其他'}],
+  '點點包裝': [...FLOWER_COLORS_COMMON],
+  '線條包裝': [...FLOWER_COLORS_COMMON],
+  '甜筒軟紙': [...FLOWER_COLORS_COMMON],
+  '甜筒硬紙': [...FLOWER_COLORS_COMMON]
 };
 
-// 襯紙專用色系
+// 襯紙專用色系（僅透明包裝使用）
 const TISSUE_GRID_COLORS = [
   {c:'black',n:'黑'},{c:'purple',n:'紫'},{c:'pink',n:'粉'},{c:'green',n:'綠'},{c:'yellow',n:'黃'},{c:'beige',n:'米'},{c:'white',n:'白'}
 ];
 const TISSUE_SOLID_COLORS = [
   {c:'black',n:'黑'},{c:'purple',n:'紫'},{c:'pink',n:'粉'},{c:'green',n:'綠'},{c:'beige',n:'米'},{c:'white',n:'白'},{c:'blue',n:'藍'}
 ];
-const WRAP_COLORS = [
-  {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
-  {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'},{c:'other',n:'其他'}
-];
+
+// 各款式包裝紙定義（直接以款式 id 作為 key）
+const WRAP_DEF = {
+  '精緻': [
+    {c:'none',n:'無指定(花藝師搭配)'},{c:'white',n:'白'},{c:'green',n:'綠'},{c:'blue',n:'藍'},{c:'pink',n:'粉'},
+    {c:'yellow',n:'黃'},{c:'purple',n:'紫'},{c:'orange',n:'橘'},{c:'black',n:'黑'},{c:'other',n:'其他'}
+  ],
+  '線條包裝': [
+    {c:'blue',n:'藍'},{c:'yellow',n:'黃'},{c:'pink',n:'粉'}
+  ],
+  '甜筒軟紙': [
+    {c:'purple',n:'紫'},{c:'yellow',n:'黃'},{c:'pink',n:'粉'},{c:'pattern',n:'小花'}
+  ],
+  '甜筒硬紙': [
+    {c:'blue',n:'藍'},{c:'green',n:'綠'},{c:'yellow',n:'黃'},{c:'pink',n:'粉'}
+  ]
+};
 
 // 預訂狀態
 let fl = {
   style: '精緻',
-  isSpec: false,
+  specSize: '', // S/M/L
   base: 1280,
-  conePaper: '軟紙',
-  coneHardFee: 0,
   colors: ['無指定(花藝師搭配)'],
   color: '無指定(花藝師搭配)',
   tissueType: 'none',
@@ -1092,7 +1089,7 @@ let fl = {
 };
 
 let bagFee = 0;
-let dateStatusMap = {}; // 格式: { "2026-10-27": true(可訂)/false(不可訂) }
+let dateStatusMap = {};
 let badgeClickCount = 0;
 let badgeClickTimer = null;
 
@@ -1111,9 +1108,6 @@ function initDateStatusMap() {
   if(saved && typeof saved === 'object') {
     dateStatusMap = saved;
   } else {
-    // 預設規則初始化未來 30 天：
-    // • 週一固定為不可訂 (false)
-    // • 其他日預設為可訂 (true)
     generateDefaultDateMap();
   }
 }
@@ -1125,11 +1119,10 @@ function generateDefaultDateMap(allOpen = false) {
     let d = new Date();
     d.setDate(now.getDate() + i);
     let dStr = toDateStr(d);
-    let dayOfWeek = d.getDay(); // 0:週日, 1:週一, 2:週二
+    let dayOfWeek = d.getDay();
     if(allOpen) {
       dateStatusMap[dStr] = true;
     } else {
-      // 預設週一公休
       dateStatusMap[dStr] = (dayOfWeek !== 1);
     }
   }
@@ -1142,18 +1135,15 @@ function saveDateStatusMap() {
   } catch(err){}
 }
 
-// 查詢某一天是否被管理者標記為可訂
 function isDateOpen(dStr) {
   if(dateStatusMap[dStr] !== undefined) {
     return dateStatusMap[dStr];
   }
-  // 未特意設定時，非週一預設可訂
   let parts = dStr.split('-');
   let d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
   return d.getDay() !== 1;
 }
 
-// 切換某一天狀態
 function toggleSingleDay(dStr) {
   let current = isDateOpen(dStr);
   dateStatusMap[dStr] = !current;
@@ -1162,7 +1152,6 @@ function toggleSingleDay(dStr) {
   updateDateLimits();
 }
 
-// 管理者快捷設定
 function adminQuickSet(action) {
   let now = new Date();
   if(action === 'allOpen') {
@@ -1188,7 +1177,6 @@ function adminQuickSet(action) {
   updateDateLimits();
 }
 
-// 渲染管理員 30 天日期切換按鈕方格
 function renderAdminDaysGrid() {
   let grid = e('admin-days-grid');
   if(!grid) return;
@@ -1221,7 +1209,7 @@ function renderAdminDaysGrid() {
 }
 
 // ──────────────────────────────────────────────
-// 彩蛋按鈕：連按三下彈出修改訂花日期/公休設定
+// 彩蛋按鈕：連按三下彈出輸入密碼５１５１
 // ──────────────────────────────────────────────
 function onBadgeTripleClick() {
   badgeClickCount++;
@@ -1230,6 +1218,16 @@ function onBadgeTripleClick() {
 
   if(badgeClickCount >= 3) {
     badgeClickCount = 0;
+    let inputPwd = prompt('🔒 請輸入管理者密碼：');
+    if(inputPwd === null) return;
+
+    let cleanPwd = inputPwd.trim().replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
+
+    if(cleanPwd !== '5151') {
+      alert('❌ 密碼錯誤，無法開啟管理者模式！');
+      return;
+    }
+
     let panel = e('admin-date-panel');
     if(panel) {
       renderAdminDaysGrid();
@@ -1245,7 +1243,7 @@ function closeAdminPanel() {
 }
 
 // ──────────────────────────────────────────────
-// 取貨日期限制邏輯（限1個月內、2天內不可訂、透包開放當天/隔天）
+// 取貨日期限制邏輯
 // ──────────────────────────────────────────────
 function updateDateLimits() {
   let dtInput = e('c-date');
@@ -1253,10 +1251,10 @@ function updateDateLimits() {
 
   let now = new Date();
   let maxDate = new Date();
-  maxDate.setDate(now.getDate() + 30); // 一個月內（30天）
+  maxDate.setDate(now.getDate() + 30);
 
   let isClear = (fl.style === '透包');
-  let minDaysAhead = isClear ? 0 : 2; // 透包可當天(0)，一般花束2天後(2)
+  let minDaysAhead = isClear ? 0 : 2;
 
   let minDate = new Date();
   minDate.setDate(now.getDate() + minDaysAhead);
@@ -1276,7 +1274,6 @@ function updateDateLimits() {
     }
   }
 
-  // 自動尋找最小可預訂的有效日期
   if(!dtInput.value || dtInput.value < minStr || dtInput.value > maxStr || !isDateOpen(dtInput.value)) {
     let nextAvailable = findNextAvailableDate(minDate, maxDate);
     dtInput.value = nextAvailable || minStr;
@@ -1285,7 +1282,6 @@ function updateDateLimits() {
   validateSelectedDate(dtInput.value);
 }
 
-// 尋找範圍內第一個可預訂日
 function findNextAvailableDate(startDate, endDate) {
   let cur = new Date(startDate.getTime());
   while(cur <= endDate) {
@@ -1316,7 +1312,7 @@ function validateSelectedDate(dtVal) {
   let parts = dtVal.split('-');
   if(parts.length < 3) return;
   let picked = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-  let dayOfWeek = picked.getDay(); // 0:週日, 1:週一, 2:週二
+  let dayOfWeek = picked.getDay();
 
   let isOpen = isDateOpen(dtVal);
 
@@ -1344,18 +1340,14 @@ function validateSelectedDate(dtVal) {
 }
 
 // ──────────────────────────────────────────────
-// 渲染款式清單（第一排3款：精緻/透包/點點；其餘：甜筒/條紋）
+// 渲染款式清單（第一排3款：精緻/透包/點點；第二排3款：線條/甜筒軟紙/甜筒硬紙）
 // ──────────────────────────────────────────────
 function renderStyles() {
   let r1 = e('gallery-row1');
   let rSub = e('gallery-sub');
 
-  if(r1) {
-    r1.innerHTML = ROW1_STYLES.map(s => buildStyleCardHtml(s)).join('');
-  }
-  if(rSub) {
-    rSub.innerHTML = SUB_STYLES.map(s => buildStyleCardHtml(s)).join('');
-  }
+  if(r1) r1.innerHTML = ROW1_STYLES.map(s => buildStyleCardHtml(s)).join('');
+  if(rSub) rSub.innerHTML = SUB_STYLES.map(s => buildStyleCardHtml(s)).join('');
 }
 
 function buildStyleCardHtml(s) {
@@ -1363,7 +1355,7 @@ function buildStyleCardHtml(s) {
   return `
     <div class="style-card ${activeCls}" onclick="onSelectStyle('${s.id}')">
       <div class="style-img-wrap">
-        <img src="${s.img}" alt="${s.name}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'120\\' height=\\'120\\' fill=\\'%23f3f0ff\\'><rect width=\\'120\\' height=\\'120\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23574b90\\' font-size=\\'12\\'>🌸 ${s.id}</text></svg>'">
+        <img src="${s.img}" alt="${s.name}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'120\\' height=\\'120\\' fill=\\'%23f3f0ff\\'><rect width=\\'120\\' height=\\'120\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23574b90\\' font-size=\\'11\\'>🌸 ${s.name}</text></svg>'">
         <button type="button" class="zoom-btn" onclick="openImageModal(event, '${s.img}', '${s.name}')" title="點擊放大圖片">🔍</button>
       </div>
       <div class="style-info">
@@ -1374,7 +1366,6 @@ function buildStyleCardHtml(s) {
   `;
 }
 
-// 圖片放大功能
 function openImageModal(ev, src, title) {
   ev.stopPropagation();
   let m = e('image-modal');
@@ -1400,101 +1391,189 @@ function onSelectStyle(styleId) {
   if(!found) return;
 
   fl.style = found.id;
-  fl.isSpec = found.isSpec;
   fl.base = found.defaultPrice;
+  fl.specSize = '';
   e('style-badge').textContent = found.name;
 
-  // 甜筒專用選項
-  let coneBox = e('sec-cone-paper');
-  if(found.type === 'cone') {
-    coneBox.style.display = 'block';
-  } else {
-    coneBox.style.display = 'none';
-    fl.conePaper = '軟紙';
-    fl.coneHardFee = 0;
-  }
-
-  // 鮮花價格（精緻 / 透包）
-  if(found.isSpec) {
-    enablePriceSelector(false);
-  } else {
-    enablePriceSelector(true);
-    renderFlPrices();
-  }
-
-  // 提袋說明提示更新（精緻與條紋已包含）
+  // 1. 提袋判斷：精緻、點點、線條 送提袋；透包、甜筒軟紙、甜筒硬紙 加購$40
   updateBagStatusTip();
 
-  // 襯紙與外包裝顯示邏輯
-  updateTissueAndWrapVisibility();
+  // 2. 鮮花價格/規格區塊渲染（精緻與透包取消按鈕，直接自填預算）
+  renderFlPrices();
 
-  // 重新渲染色系按鈕（依各款式要求嚴格限定）
+  // 3. 襯紙選項：僅透包顯示，精緻與其他款式不顯示
+  updateTissueVisibility();
+
+  // 4. 外包裝紙選項：依款式動態切換（精緻9色+其他、線條3色、甜筒軟紙4色、甜筒硬紙4色）
+  updateWrapVisibility();
+
+  // 5. 色系按鈕渲染（花材主色系：全部皆可複選最多三種）
   renderColorButtons();
 
-  // 日期限制連動更新（透包可當天預訂，其他需提前2天）
+  // 6. 日期限制連動更新（透包可當天/隔天預訂，其他需提前2天）
   updateDateLimits();
 
   renderStyles();
   calcTotal();
 }
 
+// ──────────────────────────────────────────────
+// 提袋狀態更新：精緻、點點、線條 送提袋；其餘可選加購
+// ──────────────────────────────────────────────
 function updateBagStatusTip() {
   let boxSelector = e('box-bag-selector');
   let boxIncluded = e('box-bag-included');
-  let isIncluded = (fl.style === '精緻' || fl.style.startsWith('條紋'));
+  let isFreeBag = (fl.style === '精緻' || fl.style === '點點包裝' || fl.style === '線條包裝');
 
-  if(isIncluded) {
+  if(isFreeBag) {
     if(boxSelector) boxSelector.style.display = 'none';
     if(boxIncluded) boxIncluded.style.display = 'block';
-    bagFee = 0; // 已內含提袋，不需加價
+    bagFee = 0;
   } else {
     if(boxSelector) boxSelector.style.display = 'block';
     if(boxIncluded) boxIncluded.style.display = 'none';
-    // 若原先選中加購按鈕維持原狀，否則重設為預設不需要
     let activeBtn = e('grp-bag') ? e('grp-bag').querySelector('.btn-opt.active') : null;
     bagFee = activeBtn && activeBtn.textContent.includes('40') ? 40 : 0;
   }
 }
 
-function enablePriceSelector(en) {
-  let el = e('sec-price');
-  let tip = e('tip-price');
-  if(el) {
-    if(en) el.classList.remove('disabled-box'); else el.classList.add('disabled-box');
-  }
-  if(tip) tip.style.display = en ? 'none' : 'inline';
-}
-
+// ──────────────────────────────────────────────
+// 鮮花價格 / 規格 渲染
+// １．精緻包裝：取消 1280~3000 按鈕，直接填寫預算
+// ２．透明包裝：取消 390/500/600 按鈕，直接填寫預算
+// ３．線條包裝：顯示 S $680 / M $880 / L $1200 按鈕
+// ４．甜筒軟紙：顯示 S $500 / M $700 / L $900 按鈕
+// ５．甜筒硬紙：顯示 S $550 / M $750 / L $950 按鈕
+// ──────────────────────────────────────────────
 function renderFlPrices() {
-  let prices = fl.style === '精緻' ? [1280, 1500, 1800] : [390, 500, 600];
-  if(!prices.includes(fl.base)) fl.base = prices[0];
-  e('fl-price-tip').textContent = fl.style === '精緻' ? '(可選: 1280 / 1500 / 1800)' : '(可選: 390 / 500 / 600)';
-  e('grp-fl-price').innerHTML = prices.map(p =>
-    `<button type="button" class="btn-opt ${fl.base === p ? 'active' : ''}" onclick="setFlBase(this, ${p})">$${p}</button>`
-  ).join('');
+  let grp = e('grp-fl-price');
+  let tip = e('fl-price-tip');
+  let fixedTip = e('tip-price');
+  let boxCustom = e('box-custom-price');
+  let lblCustom = e('lbl-custom-price');
+  let inpCustom = e('inp-custom-price');
+  let tipCustomRange = e('tip-custom-price-range');
+
+  if(fixedTip) fixedTip.style.display = 'none';
+  if(boxCustom) boxCustom.style.display = 'none';
+  if(grp) grp.style.display = 'grid';
+
+  if(fl.style === '精緻') {
+    // １．精緻包裝：取消按鈕，直接自填預算
+    grp.style.display = 'none';
+    boxCustom.style.display = 'block';
+    tip.textContent = '(請直接自填預算 $1,280 ～ $3,000)';
+
+    lblCustom.textContent = '鮮花預算金額：';
+    inpCustom.placeholder = '請填寫預算（例：1500）';
+    inpCustom.min = 1280;
+    inpCustom.max = 3000;
+    inpCustom.value = (fl.base >= 1280 && fl.base <= 3000) ? fl.base : 1280;
+    fl.base = parseInt(inpCustom.value, 10) || 1280;
+    tipCustomRange.innerHTML = '💡 預算範圍：<b>$1,280 ～ $3,000 元</b>（花藝師將依填寫預算為您搭配等值花材）';
+
+  } else if(fl.style === '透包') {
+    // ２．透明包裝：取消按鈕，直接自填預算
+    grp.style.display = 'none';
+    boxCustom.style.display = 'block';
+    tip.textContent = '(請直接自填預算，最低 $390 起)';
+
+    lblCustom.textContent = '鮮花預算金額：';
+    inpCustom.placeholder = '請填寫預算（最低 $390 起）';
+    inpCustom.min = 390;
+    inpCustom.removeAttribute('max');
+    inpCustom.value = (fl.base >= 390) ? fl.base : 390;
+    fl.base = parseInt(inpCustom.value, 10) || 390;
+    tipCustomRange.innerHTML = '💡 透明包裝花束預算：<b>最低 $390 起</b>，可直接輸入您希望訂購的花束預算！';
+
+  } else if(fl.style === '點點包裝') {
+    tip.textContent = '(固定單一價格)';
+    fl.base = 1150;
+    grp.innerHTML = `<button type="button" class="btn-opt active" style="grid-column:span 3;pointer-events:none;background:var(--ac);color:#fff">固定定價：$1,150 (送提袋)</button>`;
+    if(fixedTip) fixedTip.style.display = 'inline';
+
+  } else if(fl.style === '線條包裝') {
+    tip.textContent = '(請選擇規格 S / M / L)';
+    fl.specSize = fl.specSize || 'S';
+    let specs = [
+      { s: 'S', p: 680, desc: 'Ｓ' },
+      { s: 'M', p: 880, desc: 'Ｍ' },
+      { s: 'L', p: 1200, desc: 'Ｌ' }
+    ];
+    let cur = specs.find(x => x.s === fl.specSize) || specs[0];
+    fl.specSize = cur.s;
+    fl.base = cur.p;
+
+    grp.innerHTML = specs.map(x =>
+      `<button type="button" class="btn-opt ${fl.specSize === x.s ? 'active' : ''}" onclick="setSpecPrice(this, '${x.s}', ${x.p})">
+        ${x.desc}
+        <span class="sub">$${fmt(x.p)}</span>
+      </button>`
+    ).join('');
+
+  } else if(fl.style === '甜筒軟紙') {
+    tip.textContent = '(軟紙版，請選擇規格 S / M / L)';
+    fl.specSize = fl.specSize || 'S';
+    let specs = [
+      { s: 'S', p: 500, desc: 'Ｓ' },
+      { s: 'M', p: 700, desc: 'Ｍ' },
+      { s: 'L', p: 900, desc: 'Ｌ' }
+    ];
+    let cur = specs.find(x => x.s === fl.specSize) || specs[0];
+    fl.specSize = cur.s;
+    fl.base = cur.p;
+
+    grp.innerHTML = specs.map(x =>
+      `<button type="button" class="btn-opt ${fl.specSize === x.s ? 'active' : ''}" onclick="setSpecPrice(this, '${x.s}', ${x.p})">
+        ${x.desc}
+        <span class="sub">$${fmt(x.p)}</span>
+      </button>`
+    ).join('');
+
+  } else if(fl.style === '甜筒硬紙') {
+    tip.textContent = '(立挺硬紙版，請選擇規格 S / M / L)';
+    fl.specSize = fl.specSize || 'S';
+    let specs = [
+      { s: 'S', p: 550, desc: 'Ｓ' },
+      { s: 'M', p: 750, desc: 'Ｍ' },
+      { s: 'L', p: 950, desc: 'Ｌ' }
+    ];
+    let cur = specs.find(x => x.s === fl.specSize) || specs[0];
+    fl.specSize = cur.s;
+    fl.base = cur.p;
+
+    grp.innerHTML = specs.map(x =>
+      `<button type="button" class="btn-opt ${fl.specSize === x.s ? 'active' : ''}" onclick="setSpecPrice(this, '${x.s}', ${x.p})">
+        ${x.desc}
+        <span class="sub">$${fmt(x.p)}</span>
+      </button>`
+    ).join('');
+  }
 }
 
-function setFlBase(btn, p) {
+function setSpecPrice(btn, sizeStr, p) {
   e('grp-fl-price').querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  fl.specSize = sizeStr;
   fl.base = p;
   calcTotal();
 }
 
-// 甜筒軟紙 / 硬紙切換
-function setConePaper(btn, type, fee) {
-  e('grp-cone-paper').querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  fl.conePaper = type;
-  fl.coneHardFee = fee;
-  e('cone-fee-tag').textContent = type === '硬紙' ? '立挺硬紙 (+50)' : '一般軟紙 ($0)';
+function onCustomPriceInput() {
+  let inp = e('inp-custom-price');
+  if(!inp) return;
+  let v = parseInt(inp.value, 10);
 
-  renderColorButtons();
+  if(!isNaN(v)) {
+    fl.base = v;
+  } else {
+    fl.base = 0;
+  }
   calcTotal();
 }
 
 // ──────────────────────────────────────────────
-// 色系按鈕渲染
+// 色系按鈕渲染（花材主色系：全部皆可複選最多三種）
 // ──────────────────────────────────────────────
 function renderColorButtons() {
   let grp = e('grp-fl-color');
@@ -1503,38 +1582,11 @@ function renderColorButtons() {
   let boxOther = e('box-color-other');
   if(boxOther) boxOther.style.display = 'none';
 
-  let list = [];
-  let isMulti = false;
-  let maxCount = 1;
+  let list = COLOR_DEF[fl.style] || COLOR_DEF['精緻'];
+  let isMulti = true;
+  let maxCount = 3;
 
-  if(fl.style === '精緻') {
-    list = COLOR_DEF.delicate;
-    isMulti = true;
-    maxCount = 3;
-    typeTip.textContent = '可複選最多3種';
-  } else if(fl.style === '透包') {
-    list = COLOR_DEF.clear;
-    isMulti = true;
-    maxCount = 3;
-    typeTip.textContent = '最多色系選3種';
-  } else if(fl.style.startsWith('條紋')) {
-    list = COLOR_DEF.stripe;
-    isMulti = false;
-    typeTip.textContent = '限定單選 (藍 / 黃 / 粉)';
-  } else if(fl.style.startsWith('甜筒')) {
-    if(fl.conePaper === '硬紙') {
-      list = COLOR_DEF.coneHard;
-      typeTip.textContent = '硬紙版限定單選';
-    } else {
-      list = COLOR_DEF.coneSoft;
-      typeTip.textContent = '軟紙版限定單選';
-    }
-    isMulti = false;
-  } else if(fl.style === '點點包裝') {
-    list = COLOR_DEF.dot;
-    isMulti = false;
-    typeTip.textContent = '固定白底黑點包裝';
-  }
+  typeTip.textContent = '花材色系可複選最多3種';
 
   let defaultColor = list[0].n;
   fl.colors = [defaultColor];
@@ -1547,7 +1599,7 @@ function renderColorButtons() {
   `).join('');
 
   if(countTag) {
-    countTag.textContent = isMulti ? `(1/${maxCount})` : '';
+    countTag.textContent = '(1/3)';
   }
 }
 
@@ -1555,69 +1607,61 @@ function onColorBtnClick(btn, val, isMulti, maxCount) {
   let grp = e('grp-fl-color');
   let boxOther = e('box-color-other');
 
-  if(!isMulti) {
+  let noneVal = '無指定(花藝師搭配)';
+  if(val === noneVal) {
     grp.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    fl.colors = [val];
-    fl.color = val;
+    fl.colors = [noneVal];
     if(boxOther) boxOther.style.display = 'none';
+    if(e('color-other-text')) e('color-other-text').value = '';
   } else {
-    let noneVal = '無指定(花藝師搭配)';
-    if(val === noneVal) {
-      grp.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    let noneBtn = grp.querySelector('.c-none');
+    if(noneBtn) noneBtn.classList.remove('active');
+
+    let isAct = btn.classList.contains('active');
+    let currentAct = Array.from(grp.querySelectorAll('.color-btn.active')).filter(b => b.getAttribute('data-cname') !== noneVal);
+
+    if(!isAct) {
+      if(currentAct.length >= maxCount) {
+        alert(`花材色系最多只能複選 ${maxCount} 種喔！`);
+        return;
+      }
       btn.classList.add('active');
-      fl.colors = [noneVal];
-      if(boxOther) boxOther.style.display = 'none';
-      if(e('color-other-text')) e('color-other-text').value = '';
-    } else {
-      let noneBtn = grp.querySelector('.c-none');
-      if(noneBtn) noneBtn.classList.remove('active');
-
-      let isAct = btn.classList.contains('active');
-      let currentAct = Array.from(grp.querySelectorAll('.color-btn.active')).filter(b => b.getAttribute('data-cname') !== noneVal);
-
-      if(!isAct) {
-        if(currentAct.length >= maxCount) {
-          alert(`花束色系混搭最多只能選擇 ${maxCount} 種喔！`);
-          return;
-        }
-        btn.classList.add('active');
-        if(val === '其他') {
-          if(boxOther) {
-            boxOther.style.display = 'block';
-            e('color-other-text').focus();
-          }
-        }
-      } else {
-        btn.classList.remove('active');
-        if(val === '其他') {
-          if(boxOther) boxOther.style.display = 'none';
-          if(e('color-other-text')) e('color-other-text').value = '';
+      if(val === '其他') {
+        if(boxOther) {
+          boxOther.style.display = 'block';
+          e('color-other-text').focus();
         }
       }
-
-      let act = Array.from(grp.querySelectorAll('.color-btn.active')).filter(b => b.getAttribute('data-cname') !== noneVal);
-      if(act.length === 0) {
-        if(noneBtn) noneBtn.classList.add('active');
-        fl.colors = [noneVal];
+    } else {
+      btn.classList.remove('active');
+      if(val === '其他') {
         if(boxOther) boxOther.style.display = 'none';
-      } else {
-        fl.colors = act.map(b => {
-          let cn = b.getAttribute('data-cname');
-          if(cn === '其他') {
-            let oVal = e('color-other-text') ? e('color-other-text').value.trim() : '';
-            return oVal ? ('其他:' + oVal) : '其他';
-          }
-          return cn;
-        });
+        if(e('color-other-text')) e('color-other-text').value = '';
       }
     }
 
-    fl.color = fl.colors.join('+');
-    let countTag = e('color-count-tag');
-    let n = fl.colors.filter(c => c !== '無指定(花藝師搭配)').length;
-    if(countTag) countTag.textContent = `(${n}/${maxCount})`;
+    let act = Array.from(grp.querySelectorAll('.color-btn.active')).filter(b => b.getAttribute('data-cname') !== noneVal);
+    if(act.length === 0) {
+      if(noneBtn) noneBtn.classList.add('active');
+      fl.colors = [noneVal];
+      if(boxOther) boxOther.style.display = 'none';
+    } else {
+      fl.colors = act.map(b => {
+        let cn = b.getAttribute('data-cname');
+        if(cn === '其他') {
+          let oVal = e('color-other-text') ? e('color-other-text').value.trim() : '';
+          return oVal ? ('其他:' + oVal) : '其他';
+        }
+        return cn;
+      });
+    }
   }
+
+  fl.color = fl.colors.join('+');
+  let countTag = e('color-count-tag');
+  let n = fl.colors.filter(c => c !== '無指定(花藝師搭配)').length;
+  if(countTag) countTag.textContent = `(${n}/${maxCount})`;
 
   updatePreview();
 }
@@ -1630,31 +1674,19 @@ function onColorOtherInput() {
 }
 
 // ──────────────────────────────────────────────
-// 襯紙與外包裝顯示與選項設定
+// 襯紙顯示與選項設定（僅透明包裝花束適用，精緻與其他款式不顯示）
 // ──────────────────────────────────────────────
-function updateTissueAndWrapVisibility() {
-  let isTissueAllowed = (fl.style === '精緻' || fl.style === '透包');
-  let isWrapAllowed = (fl.style === '精緻');
-
+function updateTissueVisibility() {
+  let isTissueAllowed = (fl.style === '透包');
   let secTissue = e('sec-tissue');
-  let tipTissue = e('tip-tissue');
-  let secWrap = e('sec-wrap');
-  let tipWrap = e('tip-wrap');
 
   if(secTissue) {
-    if(isTissueAllowed) secTissue.classList.remove('disabled-box');
-    else secTissue.classList.add('disabled-box');
+    secTissue.style.display = isTissueAllowed ? 'block' : 'none';
   }
-  if(tipTissue) tipTissue.style.display = isTissueAllowed ? 'none' : 'inline';
 
-  if(secWrap) {
-    if(isWrapAllowed) secWrap.classList.remove('disabled-box');
-    else secWrap.classList.add('disabled-box');
+  if(!isTissueAllowed) {
+    setTissueType('none');
   }
-  if(tipWrap) tipWrap.style.display = isWrapAllowed ? 'none' : 'inline';
-
-  if(!isTissueAllowed) setTissueType('none');
-  if(!isWrapAllowed) fl.wrap = '無指定(花藝師搭配)';
 }
 
 function setTissueType(type) {
@@ -1662,12 +1694,14 @@ function setTissueType(type) {
   let colorsBox = e('grp-tissue-colors');
   let tip = e('tissue-grid-tip');
 
-  grp.querySelectorAll('.btn-opt').forEach((b, idx) => {
-    b.classList.remove('active');
-    if((type === 'none' && idx === 0) || (type === 'solid' && idx === 1) || (type === 'grid' && idx === 2)) {
-      b.classList.add('active');
-    }
-  });
+  if(grp) {
+    grp.querySelectorAll('.btn-opt').forEach((b, idx) => {
+      b.classList.remove('active');
+      if((type === 'none' && idx === 0) || (type === 'solid' && idx === 1) || (type === 'grid' && idx === 2)) {
+        b.classList.add('active');
+      }
+    });
+  }
 
   fl.tissueType = type;
 
@@ -1675,16 +1709,16 @@ function setTissueType(type) {
     fl.tFee = 0;
     fl.tissueColor = '';
     fl.tissueText = '無襯紙 ($0)';
-    colorsBox.style.display = 'none';
+    if(colorsBox) colorsBox.style.display = 'none';
     if(tip) tip.textContent = '';
   } else if(type === 'solid') {
     fl.tFee = 100;
-    colorsBox.style.display = 'grid';
+    if(colorsBox) colorsBox.style.display = 'grid';
     if(tip) tip.textContent = '(請點選1種純色襯紙)';
     renderTissueColorBtns(TISSUE_SOLID_COLORS, '純色');
   } else if(type === 'grid') {
     fl.tFee = 100;
-    colorsBox.style.display = 'grid';
+    if(colorsBox) colorsBox.style.display = 'grid';
     if(tip) tip.textContent = '(請點選1種網格襯紙顏色)';
     renderTissueColorBtns(TISSUE_GRID_COLORS, '網格');
   }
@@ -1715,11 +1749,52 @@ function onSelectTissueColor(btn, colorName, kindPrefix) {
   calcTotal();
 }
 
-function initWrapBtns() {
+// ──────────────────────────────────────────────
+// 外包裝紙選項：依款式動態切換
+// １．精緻包裝：外包裝選色（無指定、白、綠、藍、粉、黃、紫、橘、黑、其他）
+// ３．甜筒花束 (軟紙)：包裝限定單選 4 選 1（紫 / 黃 / 粉 / 小花）
+// ４．甜筒花束 (硬紙)：包裝限定單選 4 選 1（藍 / 綠 / 黃 / 粉）
+// ５．線條包裝花束：包裝紙色系限定單選（藍 / 黃 / 粉）
+// ──────────────────────────────────────────────
+function updateWrapVisibility() {
+  let secWrap = e('sec-wrap');
+  let titleWrap = e('title-wrap');
+  let tipWrapType = e('tip-wrap-type');
   let grp = e('grp-fl-wrap');
-  if(!grp) return;
-  grp.innerHTML = WRAP_COLORS.map((x, i) =>
-    `<button type="button" class="color-btn c-${x.c} ${i===0?'active':''}" data-wname="${x.n}" onclick="selWrap(this, '${x.n}')">
+  let boxOther = e('box-wrap-other');
+  if(boxOther) boxOther.style.display = 'none';
+
+  let wrapList = WRAP_DEF[fl.style];
+
+  if(!wrapList || fl.style === '透包' || fl.style === '點點包裝') {
+    if(secWrap) secWrap.style.display = 'none';
+    fl.wrap = '';
+    return;
+  }
+
+  if(secWrap) secWrap.style.display = 'block';
+
+  if(fl.style === '精緻') {
+    titleWrap.innerHTML = '🎁 ④ 外包裝紙選色';
+    tipWrapType.textContent = '單選 / 免費選色';
+  } else if(fl.style === '線條包裝') {
+    titleWrap.innerHTML = '🎁 ④ 包裝紙色系 <span style="font-size:11px;color:#d6304d;font-weight:bold">（限定單選：藍 / 黃 / 粉）</span>';
+    tipWrapType.textContent = '限定單選';
+  } else if(fl.style === '甜筒軟紙') {
+    titleWrap.innerHTML = '🍦 ④ 包裝紙限定單選 <span style="font-size:11px;color:#d6304d;font-weight:bold">（軟紙 4 選 1：紫 / 黃 / 粉 / 小花）</span>';
+    tipWrapType.textContent = '軟紙4選1';
+  } else if(fl.style === '甜筒硬紙') {
+    titleWrap.innerHTML = '🍦 ④ 包裝紙限定單選 <span style="font-size:11px;color:#d6304d;font-weight:bold">（硬紙 4 選 1：藍 / 綠 / 黃 / 粉）</span>';
+    tipWrapType.textContent = '硬紙4選1';
+  }
+
+  let exists = wrapList.some(x => x.n === fl.wrap);
+  if(!exists) {
+    fl.wrap = wrapList[0].n;
+  }
+
+  grp.innerHTML = wrapList.map(x =>
+    `<button type="button" class="color-btn c-${x.c} ${fl.wrap===x.n?'active':''}" data-wname="${x.n}" onclick="selWrap(this, '${x.n}')">
       <span class="color-dot"></span>${x.n}
     </button>`
   ).join('');
@@ -1764,7 +1839,7 @@ function selBag(btn, fee) {
 // 計算金額與生成明細清單
 // ──────────────────────────────────────────────
 function getFlTotal() {
-  return Math.max(0, (fl.base || 0) + (fl.tFee || 0) + (fl.coneHardFee || 0));
+  return Math.max(0, (fl.base || 0) + (fl.tFee || 0));
 }
 
 function getOrderItems() {
@@ -1772,29 +1847,32 @@ function getOrderItems() {
   let flT = getFlTotal();
 
   let sp = [];
-  if(fl.style.startsWith('甜筒')) {
-    sp.push(`紙材:${fl.conePaper}${fl.coneHardFee>0 ? '(+50)' : ''}`);
+  if(fl.specSize) {
+    sp.push(`規格:${fl.specSize}號`);
   }
-  if(fl.style !== '點點包裝') {
-    sp.push('色系:' + fl.color);
-  } else {
-    sp.push('色系:固定白色黑點');
+  sp.push('花材色系:' + fl.color);
+
+  if(fl.tFee > 0 && fl.style === '透包') {
+    sp.push(fl.tissueText);
   }
 
-  if(fl.tFee > 0) sp.push(fl.tissueText);
-  if(fl.style === '精緻' && fl.wrap !== '無指定(花藝師搭配)') sp.push('包裝:' + fl.wrap);
+  let hasWrap = (fl.style === '精緻' || fl.style === '線條包裝' || fl.style === '甜筒軟紙' || fl.style === '甜筒硬紙');
+  if(hasWrap && fl.wrap) {
+    sp.push('包裝紙:' + fl.wrap);
+  }
 
+  let itemName = fl.style + (fl.style.includes('花束') ? '' : '花束');
   items.push({
-    name: fl.style + (fl.style.includes('包裝') ? '' : '包裝花束'),
+    name: itemName,
     desc: sp.join(' / '),
     price: flT
   });
 
-  let isIncluded = (fl.style === '精緻' || fl.style.startsWith('條紋'));
-  if(isIncluded) {
-    items.push({ name: '花束提袋', desc: '款式價格已內含', price: 0 });
+  let isFreeBag = (fl.style === '精緻' || fl.style === '點點包裝' || fl.style === '線條包裝');
+  if(isFreeBag) {
+    items.push({ name: '花束專屬提袋', desc: '款式價格已內含 (免費附贈)', price: 0 });
   } else if(bagFee > 0) {
-    items.push({ name: '花束提袋', desc: '加購', price: bagFee });
+    items.push({ name: '花束專屬提袋', desc: '加購提袋', price: bagFee });
   }
 
   return items;
@@ -1926,6 +2004,23 @@ function submitToLine() {
     return;
   }
 
+  // 驗證自訂預算合理性
+  if(fl.style === '精緻') {
+    if(!fl.base || fl.base < 1280 || fl.base > 3000) {
+      alert('⚠️ 精緻包裝花束之預算範圍為 $1,280 ～ $3,000 元，請填寫有效金額喔！');
+      let inp = e('inp-custom-price');
+      if(inp) inp.focus();
+      return;
+    }
+  } else if(fl.style === '透包') {
+    if(!fl.base || fl.base < 390) {
+      alert('⚠️ 透明包裝花束最低預算為 $390 起，請填寫有效金額喔！');
+      let inp = e('inp-custom-price');
+      if(inp) inp.focus();
+      return;
+    }
+  }
+
   let dtVal = e('c-date').value;
   if(dtVal && !isDateOpen(dtVal)) {
     if(!confirm(`⚠️ 提醒：您選擇的取貨日期【${dtVal}】為公休日或預約已滿。\n確定仍要傳送訂單給官方 LINE 客服詢問排單嗎？`)) {
@@ -1961,7 +2056,6 @@ function closeModal() {
 // ──────────────────────────────────────────────
 initDateStatusMap();
 renderStyles();
-initWrapBtns();
 onSelectStyle('精緻'); // 預設選中精緻包裝花束
 updateDateLimits();
 calcTotal();
